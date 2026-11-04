@@ -1,0 +1,16 @@
+# ── API REST (api.py) ───────────────────────────────────────────────────────
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# ── RAG Core (rag_system.py) ────────────────────────────────────────────────
+sentence-transformers>=2.7.0     # Embeddings multilinguais PT-BR
+faiss-cpu>=1.8.0                 # Vector store em memória
+numpy>=1.26.0
+
+# ── LLM Backends (escolha um) ────────────────────────────────────────────
+openai>=1.30.0                   # GPT-4o-mini / text-embedding-3-small
+anthropic>=0.28.0                # Claude Sonnet
+google-genai>=1.0.0              # Gemini — opção gratuita (aistudio.google.com/apikey)
+
+# ── Utilitários ────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0             # Gerenciamento de variáveis de ambiente

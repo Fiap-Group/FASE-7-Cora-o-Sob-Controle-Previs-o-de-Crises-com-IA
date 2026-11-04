@@ -1,0 +1,7 @@
+{
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/app/backend",
+    "${workspaceFolder}/app/backend/avaliacao"
+  ],
+  "python.analysis.typeCheckingMode": "basic"
+}

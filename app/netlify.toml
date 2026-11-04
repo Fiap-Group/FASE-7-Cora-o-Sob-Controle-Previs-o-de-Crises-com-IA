@@ -1,0 +1,12 @@
+# Build do front web (Expo) para publicação estática.
+# A URL da API vem de EXPO_PUBLIC_API_URL, configurada no painel do Netlify
+# (ex.: a URL do túnel que aponta para o backend no seu computador).
+[build]
+  command = "npm install && npx expo export -p web"
+  publish = "dist"
+
+# Rotas do app (navegação por abas) devem servir o index.html.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
