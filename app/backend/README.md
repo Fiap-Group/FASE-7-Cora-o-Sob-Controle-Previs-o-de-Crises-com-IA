@@ -22,7 +22,7 @@ source .venv/bin/activate         # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 cp .env.example .env              # preencha GEMINI_API_KEY
-python api.py
+python -m src.api
 ```
 
 A API sobe em `http://localhost:5000`. Deixe esse processo rodando junto do

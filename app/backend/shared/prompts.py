@@ -10,7 +10,7 @@ Público-alvo: paciente leigo, sem formação em saúde ou genética.
 =============================================================================
 """
 
-from glossario import glossario_para_prompt
+from shared.glossario import glossario_para_prompt
 
 # Prompt de sistema do LLMGenerator (rag_system.py). Define o papel do
 # agente, o formato da resposta para leigos e os LIMITES técnicos do que ele

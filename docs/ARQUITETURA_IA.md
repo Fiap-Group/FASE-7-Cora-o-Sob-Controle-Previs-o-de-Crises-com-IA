@@ -1,7 +1,7 @@
 # Arquitetura de IA — Genera Intelligence
 
-Documento técnico da inteligência do sistema: pipeline RAG (`app/backend/rag_system.py`),
-API que o expõe (`app/backend/api.py`) e como o front-end consome tudo isso.
+Documento técnico da inteligência do sistema: pipeline RAG (`app/backend/shared/rag_system.py`),
+API que o expõe (`app/backend/src/api.py`) e como o front-end consome tudo isso.
 
 ## Visão geral do fluxo
 
@@ -97,7 +97,7 @@ irrelevante).
 ### Anti-alucinação (3 camadas, ver `docs/GOVERNANCA_E_RISCOS.md` para a
 discussão de riscos)
 
-1. **Prompt de sistema** (`app/backend/prompts.py`) instrui o modelo a
+1. **Prompt de sistema** (`app/backend/shared/prompts.py`) instrui o modelo a
    responder só com base no contexto fornecido.
 2. **Score mínimo** no retrieval descarta contexto irrelevante antes mesmo
    de chegar no LLM.
@@ -109,11 +109,11 @@ discussão de riscos)
 
 ## Engenharia de prompts
 
-- `app/backend/prompts.py` — prompt de sistema do agente de chat
+- `app/backend/shared/prompts.py` — prompt de sistema do agente de chat
   (`SYSTEM_PROMPT_RAG`), separado da lógica do pipeline. Na Sprint 4 foi
   reescrito para o paciente leigo: respostas de até 120 palavras, ordem fixa
   (resposta direta → o que significa → o que fazer) e linguagem sem jargão.
-- `app/backend/glossario.py` — termos técnicos com explicação pronta em
+- `app/backend/shared/glossario.py` — termos técnicos com explicação pronta em
   linguagem simples (ex.: alelo, haplogrupo, MTHFR). O glossário é injetado no
   prompt, para que o modelo use as traduções já escritas, em vez de criar uma
   explicação diferente a cada resposta.

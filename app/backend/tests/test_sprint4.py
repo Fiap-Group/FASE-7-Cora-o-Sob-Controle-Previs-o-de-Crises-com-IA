@@ -18,10 +18,10 @@ from flask.testing import FlaskClient
 BACKEND = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND))
 
-from rag_system import Chunk, GenomicChunker, TextCleaner, VectorStore  # noqa: E402
-from prompts import DISCLAIMER_RESPOSTA, SYSTEM_PROMPT_RAG  # noqa: E402
-import api  # noqa: E402
-from observabilidade import FormatadorJSON, Metricas  # noqa: E402
+from shared.rag_system import Chunk, GenomicChunker, TextCleaner, VectorStore  # noqa: E402
+from shared.prompts import DISCLAIMER_RESPOSTA, SYSTEM_PROMPT_RAG  # noqa: E402
+import src.api as api  # noqa: E402
+from shared.observabilidade import FormatadorJSON, Metricas  # noqa: E402
 
 RELATORIO_EXEMPLO = BACKEND / "sample_sprint1_output.json"
 
@@ -70,7 +70,7 @@ class EmbeddingFalso:
 
 def test_index_patient_substitui_o_relatorio_anterior():
     """Regressão do bloqueador: indexar um 2º relatório não pode manter o 1º no índice."""
-    from rag_system import GenomicRAGPipeline
+    from shared.rag_system import GenomicRAGPipeline
 
     dados = json.loads(RELATORIO_EXEMPLO.read_text(encoding="utf-8"))
     segundo = json.loads(json.dumps(dados))

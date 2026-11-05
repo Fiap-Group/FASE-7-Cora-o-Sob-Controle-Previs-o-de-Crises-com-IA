@@ -44,7 +44,7 @@ yarn-error.*
 app/backend/__pycache__/
 app/backend/.venv/
 app/backend/.env
-app/backend/logs/
+app/backend/shared/logs/
 app/backend/.pytest_cache/
 app/dist/
 

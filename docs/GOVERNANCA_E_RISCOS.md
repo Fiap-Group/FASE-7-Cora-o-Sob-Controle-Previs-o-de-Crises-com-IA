@@ -9,7 +9,7 @@ O escopo do agente é restrito em duas camadas independentes, pra que ele não
 execute nada fora do documentado mesmo diante de tentativa de manipulação
 via prompt do usuário:
 
-1. **Técnica (prompt de sistema)** — `app/backend/prompts.py`,
+1. **Técnica (prompt de sistema)** — `app/backend/shared/prompts.py`,
    `SYSTEM_PROMPT_RAG`, seção "LIMITES DO AGENTE": instrui explicitamente o
    modelo a **não** prescrever medicamento/dosagem/tratamento, **não** emitir
    diagnóstico, **não** executar ou orientar qualquer procedimento fora de
@@ -55,8 +55,8 @@ do modelo lembrar de incluir.
 ## Disclaimers aplicados
 
 - **Obrigatório em toda resposta do chat**: `GenomicRAGPipeline.answer()`
-  (`app/backend/rag_system.py`) anexa por código o texto de
-  `DISCLAIMER_RESPOSTA` (`app/backend/prompts.py`) ao final de **toda**
+  (`app/backend/shared/rag_system.py`) anexa por código o texto de
+  `DISCLAIMER_RESPOSTA` (`app/backend/shared/prompts.py`) ao final de **toda**
   resposta gerada pelo agente — chat e resumos automáticos, já que ambos
   passam pelo mesmo `/api/chat`. É um controle determinístico, fora do LLM:
   não depende do modelo optar por incluir o aviso, ele é concatenado depois
@@ -65,7 +65,7 @@ do modelo lembrar de incluir.
 - Componente `Disclaimer` (`app/src/components/Disclaimer.js`) exibido nas
   telas **Dashboard** e **Riscos**, lembrando que as informações são
   interpretações do relatório genético e não substituem avaliação médica.
-- O próprio **prompt de sistema** do agente (`app/backend/prompts.py`) instrui
+- O próprio **prompt de sistema** do agente (`app/backend/shared/prompts.py`) instrui
   o modelo a: contextualizar risco genético como fator e não destino,
   sugerir consulta a especialista quando pertinente, e admitir explicitamente
   quando não tem a informação, em vez de inventar.
@@ -90,7 +90,7 @@ do modelo lembrar de incluir.
 
 - Ao indexar um relatório (`POST /api/index`) e ao fazer uma pergunta
   (`POST /api/chat`), os dados do relatório e/ou os trechos recuperados
-  trafegam até o **backend Flask local** (`app/backend/api.py`) e, na etapa
+  trafegam até o **backend Flask local** (`app/backend/src/api.py`) e, na etapa
   de geração da resposta, até a **API do provedor de LLM configurado**
   (Gemini/Anthropic/OpenAI, conforme a chave usada) — esse é dado de saúde
   sensível saindo para um serviço de terceiro, e isso deve ser tratado como

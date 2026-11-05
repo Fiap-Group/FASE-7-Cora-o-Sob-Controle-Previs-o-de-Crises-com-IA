@@ -121,7 +121,7 @@ preservado à parte, no SQLite local.
 | Dashboard com cards de risco e resumo de ancestralidade | `app/src/screens/DashboardScreen.js`, `HomeScreen.js`                               |
 | Front-end simples e funcional                           | `app/` (versão web, Expo)                                                           |
 | Navegação clara entre seções do perfil genético         | abas Dashboard / Riscos / Ancestralidade / Análise                                  |
-| Personalização das respostas via RAG                    | `app/backend/rag_system.py` (índice por relatório)                                  |
+| Personalização das respostas via RAG                    | `app/backend/shared/rag_system.py` (índice por relatório)                                  |
 | Simplificação de linguagem (NLP)                        | `prompts.py`, `glossario.py`, `TextCleaner`                                         |
 | Sistema RAG (busca vetorial + geração fundamentada)     | `rag_system.py`, detalhado em `docs/ARQUITETURA_IA.md`                              |
 | Resumos automáticos do relatório                        | `app/src/services/resumoService.js` (ver nota de escopo)                            |

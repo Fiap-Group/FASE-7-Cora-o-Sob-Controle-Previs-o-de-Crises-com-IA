@@ -36,12 +36,17 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from observabilidade import configurar_logs, hash_pergunta, metricas
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # app/backend, p/ achar o pacote shared
+
+from shared.observabilidade import configurar_logs, hash_pergunta, metricas
 
 load_dotenv()
 configurar_logs()
 
-from rag_system import GenomicRAGPipeline  # noqa: E402  (precisa vir depois do load_dotenv)
+from shared.rag_system import GenomicRAGPipeline  # noqa: E402  (precisa vir depois do load_dotenv)
 
 logger = logging.getLogger("genera_api")
 

@@ -26,7 +26,7 @@ from typing import Any, cast
 
 import numpy as np
 
-from prompts import DISCLAIMER_RESPOSTA, SYSTEM_PROMPT_RAG
+from shared.prompts import DISCLAIMER_RESPOSTA, SYSTEM_PROMPT_RAG
 
 # ---------------------------------------------------------------------------
 # Logging
