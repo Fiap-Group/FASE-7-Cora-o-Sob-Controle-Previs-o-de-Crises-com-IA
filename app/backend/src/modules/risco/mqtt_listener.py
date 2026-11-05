@@ -6,8 +6,8 @@ Assina o tópico publicado pelo ESP32 (iot/esp32/main.py, MicroPython) e guarda 
 leitura mais recente em memória — não dispara a avaliação de risco (que
 chama o Gemini várias vezes via shared/agentes/) a cada mensagem. O ESP32
 publica a cada 2s; se cada mensagem disparasse a cadeia de agentes, a cota
-diária gratuita do Gemini (ver docs/ARQUITETURA_IA.md) estouraria em menos
-de um minuto. A avaliação continua manual, disparada pelo usuário no front
+diária gratuita do Gemini estouraria em menos de um minuto. A avaliação
+continua manual, disparada pelo usuário no front
 com os valores desta leitura como ponto de partida.
 
 `get_leitura_iot` é a dependency (igual a `get_estado` do módulo RAG) —

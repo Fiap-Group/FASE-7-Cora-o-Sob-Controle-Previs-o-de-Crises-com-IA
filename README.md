@@ -20,57 +20,56 @@ CaiqueFiap-2026
 
 ## 📜 Descrição
 
-Entrega final do curso, unindo e evoluindo o que foi construído nas fases
-anteriores em um único repositório:
+Entrega final do curso: uma plataforma de previsão de crise cardíaca a
+partir de dados de operação hospitalar, com um app mobile e um web
+consumindo o mesmo backend, mais a simulação de um sensor IoT (ESP32). Três
+peças de IA compõem o backend:
 
-- **App** (React Native/Expo, versão web) + **backend** (Python/FastAPI +
-  RAG): infraestrutura herdada de uma fase anterior, reaproveitada como
-  base — o paciente envia o próprio relatório genético e conversa com um
-  agente de IA sobre ele, em linguagem simples, com as fontes à vista e
-  aviso de que a resposta é informativa, não um diagnóstico.
-- **Modelo preditivo de risco cardíaco** (PyTorch), treinado sobre uma base
-  sintética de operação hospitalar.
-- **Sistema multiagente** (OpenAI Agents SDK + Gemini), com 4 agentes
-  especializados (Orquestrador → Analista de Risco → Especialista em
-  Protocolos → Planejador de Resposta) que analisam o risco previsto e
-  recomendam uma resposta operacional.
+- **RAG genômico** — infraestrutura herdada de uma fase anterior: o
+  paciente envia o relatório genético e conversa com um agente de IA sobre
+  ele, em linguagem simples, com as fontes à vista e aviso de que a
+  resposta é informativa, não um diagnóstico. Só no app mobile.
+- **Modelo preditivo de risco cardíaco** (PyTorch) + **sistema
+  multiagente** (OpenAI Agents SDK + Gemini, 4 agentes: Orquestrador →
+  Analista de Risco → Especialista em Protocolos → Planejador de
+  Resposta) — expostos como `POST /api/risco/avaliar`, consumidos tanto
+  pelo mobile quanto pelo web.
+- **Conta de usuário + Perfil gamificado** — login compartilhado entre os
+  dois front-ends (Postgres no backend) e um histórico de avaliações por
+  usuário, exibido como "ficha de jogador" (avatar, risco em destaque,
+  histórico).
 
-O modelo preditivo e o sistema multiagente já estão implementados e
-testados de forma independente (`app/backend/shared/preditivo/`,
-`app/backend/shared/agentes/`), mas ainda não estão expostos como endpoints
-HTTP — essa integração, o deploy e a simulação de IoT fazem parte do
-restante do escopo da Fase 7 e estão em andamento.
+Detalhes de lógica de negócio, endpoints e como rodar cada parte estão no
+README de cada pasta: [`app/backend/README.md`](app/backend/README.md),
+[`app/mobile/README.md`](app/mobile/README.md),
+[`app/web/README.md`](app/web/README.md).
 
 ## 📁 Estrutura do projeto
 
 ```
-docs/
-  ARQUITETURA_IA.md              # Escolha do LLM, embeddings, retrieval (módulo RAG)
-  GOVERNANCA_E_RISCOS.md          # Limites do agente, disclaimers, privacidade
-  POLITICA_GOVERNANCA_IA.md       # LGPD, ciclo de vida dos dados, logging, explicabilidade
-  AVALIACAO_MODELO.md             # Resultados da avaliação contra o gabarito (RAG)
+.github/workflows/ci.yml          # CI: testes (unitários + integração) + checagem de tipos a cada push
 
-.github/workflows/ci.yml          # CI: testes + checagem de tipos a cada push
+iot/esp32/                        # Simulação Wokwi (MicroPython): lê o sensor e publica via MQTT
+  main.py, diagram.json, secrets.py
 
 app/
-  mobile/                         # App React Native/Expo
+  mobile/                         # App React Native/Expo — ver app/mobile/README.md
     src/                          # screens, components, db (SQLite), services
     app.json, eas.json            # Config do build .apk (EAS Build)
 
-  web/                            # App React+Vite (dashboard web)
-    src/                          # App.jsx, api.js
+  web/                            # App React+Vite — ver app/web/README.md
+    src/                          # App.jsx, Dashboard.jsx, Perfil.jsx, api.js
     vercel.json                   # Rotas SPA (deploy na Vercel)
 
-  backend/                        # Backend (FastAPI)
-    src/
-      main.py                     # Ponto de entrada da API (equivalente a app.ts/main.ts)
-      modules/rag/                # Endpoints do RAG (router, dependencies, schemas)
+  backend/                        # Backend (FastAPI) — ver app/backend/README.md
+    src/modules/{rag,risco,auth,perfil}/   # Endpoints por módulo
     shared/                       # Compartilhável entre módulos
       rag_system.py, prompts.py, glossario.py, observabilidade.py
-      preditivo/                  # Parte 1: modelo PyTorch de risco cardíaco
-      agentes/                    # Parte 2: sistema multiagente (OpenAI Agents SDK + Gemini)
+      preditivo/                  # Modelo PyTorch de risco cardíaco
+      agentes/                    # Sistema multiagente (OpenAI Agents SDK + Gemini)
+      db.py, models.py            # Postgres/SQLAlchemy (conta + histórico de risco)
     scripts/                      # Checagens locais (ci_local.sh)
-    tests/                        # Testes automatizados (sem chamar o LLM)
+    tests/{unitarios,integracao}/ # Testes automatizados (sem chamar o LLM)
     Dockerfile, docker-compose.yml
     sample_sprint1_output.json    # Exemplo de relatório genômico
 ```
@@ -81,9 +80,7 @@ app/
 
 Pipeline de busca vetorial + geração fundamentada (Gemini), com índice por
 paciente, pseudonimização antes do LLM, logging estruturado sem dados
-pessoais, avaliação automática das respostas contra um gabarito e
-disclaimers obrigatórios. Detalhado em `docs/ARQUITETURA_IA.md`,
-`docs/GOVERNANCA_E_RISCOS.md` e `docs/POLITICA_GOVERNANCA_IA.md`.
+pessoais e disclaimers obrigatórios.
 
 ### Preditivo de risco cardíaco (`shared/preditivo/`)
 
@@ -107,9 +104,9 @@ Pré-requisitos: **Docker**, **Node.js/npm** e uma chave do Gemini (gratuita):
 https://aistudio.google.com/apikey
 
 ```bash
-# 1. Backend (RAG)
+# 1. Backend (sobe junto o Postgres, via docker-compose)
 cd app/backend
-cp .env.example .env                  # preencha GEMINI_API_KEY
+cp .env.example .env                  # preencha GEMINI_API_KEY e POSTGRES_PASSWORD
 docker compose up -d --build
 curl http://localhost:5000/api/health # {"status": "ok", ...}
 
@@ -127,7 +124,20 @@ npm run dev                           # abre em http://localhost:5173
 - Testes e checagem de tipos (sem chamar o Gemini): `bash app/backend/scripts/ci_local.sh`.
 - Treinar o modelo preditivo: `python -m shared.preditivo.treinar`, em `app/backend`.
 - Demo do multiagente (precisa de `GEMINI_API_KEY`): `python -m shared.agentes.demo`, em `app/backend`.
-- Detalhes do backend (endpoints, variáveis de ambiente, curl): `app/backend/README.md`.
+- Detalhes de cada parte (endpoints, variáveis de ambiente, lógica de
+  negócio): `app/backend/README.md`, `app/mobile/README.md`,
+  `app/web/README.md`.
+
+## 🚀 Deploy
+
+| Parte | Onde | Status |
+|---|---|---|
+| Backend | A decidir (ex.: túnel ngrok/cloudflared, ou um VPS com o `docker-compose.yml` como está) | **Em aberto** |
+| Web | Vercel (Root Directory `app/web`, `vercel.json` já tem o rewrite de SPA) | Decidido — falta só a URL do backend em `VITE_API_URL` |
+| Mobile | `.apk` via `eas build` (perfil `preview` já configurado em `eas.json`) | Decidido — falta só a URL do backend em `EXPO_PUBLIC_API_URL` |
+
+O backend é o bloqueador dos outros dois: web e mobile só recebem a URL
+final depois que ele tiver um endereço público decidido.
 
 ### Observabilidade
 
