@@ -101,32 +101,45 @@ por Pydantic). Ver `app/backend/shared/agentes/orquestracao.py`.
 
 ## ▶️ Como rodar
 
-Pré-requisitos: **Docker**, **Node.js/npm** e uma chave do Gemini (gratuita):
-https://aistudio.google.com/apikey
+Pré-requisitos: **Docker**, **Node.js/npm**, **ngrok** (com o domínio fixo
+configurado — ver [Deploy](#-deploy)) e uma chave do Gemini (gratuita):
+https://aistudio.google.com/apikey.
+
+Primeira vez: `cp app/backend/.env.example app/backend/.env` e preencha
+`GEMINI_API_KEY`/`POSTGRES_PASSWORD`.
 
 ```bash
-# 1. Backend (sobe junto o Postgres, via docker-compose)
-cd app/backend
-cp .env.example .env                  # preencha GEMINI_API_KEY e POSTGRES_PASSWORD
-docker compose up -d --build
-curl http://localhost:5000/api/health # {"status": "ok", ...}
-
-# 2. Front mobile local (opcional — testa contra o backend da sua máquina)
-cd ../mobile
-npm install
-npx expo start --web                  # abre em http://localhost:8081
-
-# 3. Front web local (opcional)
-cd ../web
-npm install
-npm run dev                           # abre em http://localhost:5173
+./scripts/subir-local.sh
 ```
+
+Sobe tudo de uma vez: backend + Postgres + stack de observabilidade (via
+`docker compose`), túnel ngrok e os dois dev servers (mobile e web), cada um
+em background. No final imprime as URLs e onde ficam os logs
+(`logs/*.log`).
+
+```bash
+./scripts/parar-local.sh
+```
+
+Derruba tudo: ngrok, mobile, web e o backend (`docker compose down`, sem
+apagar os volumes — Postgres e os dados do Grafana continuam preservados
+pra próxima subida).
 
 - Testes e checagem de tipos (sem chamar o Gemini): `bash app/backend/scripts/ci_local.sh`.
 - Treinar o modelo preditivo: `python -m shared.preditivo.treinar`, em `app/backend`.
 - Detalhes de cada parte (endpoints, variáveis de ambiente, lógica de
   negócio): `app/backend/README.md`, `app/mobile/README.md`,
   `app/web/README.md`.
+
+## 📱 Gerar o `.apk` de novo
+
+```bash
+./scripts/build-mobile.sh
+```
+
+Builda o mobile na nuvem da Expo (perfil `preview`, `app/mobile/eas.json`)
+e imprime o link do `.apk` ao final. Pede login na EAS CLI se a sessão
+tiver expirado.
 
 ## 🚀 Deploy
 
