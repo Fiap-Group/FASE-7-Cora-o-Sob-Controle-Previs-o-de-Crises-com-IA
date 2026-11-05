@@ -1,0 +1,23 @@
+apiVersion: 1
+
+providers:
+  - name: backend
+    folder: backend
+    type: file
+    updateIntervalSeconds: 30
+    options:
+      path: /etc/grafana/dashboards/backend
+
+  - name: mobile
+    folder: mobile
+    type: file
+    updateIntervalSeconds: 30
+    options:
+      path: /etc/grafana/dashboards/mobile
+
+  - name: web
+    folder: web
+    type: file
+    updateIntervalSeconds: 30
+    options:
+      path: /etc/grafana/dashboards/web

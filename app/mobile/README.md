@@ -44,21 +44,25 @@ Por padrão aponta pro backend em `http://localhost:5000` (`10.0.2.2` no
 emulador Android). Pra apontar pra outro backend, defina
 `EXPO_PUBLIC_API_URL` antes de rodar.
 
-## Gerar o `.apk` (EAS Build)
+## Gerar o `.apk` (EAS Build — publicado)
+
+**Download direto:** https://expo.dev/artifacts/eas/FKk1dMZxV-uv-3azakHxs7ENUqQyzXadmVXr4h0H0FA.apk
+
+**Build no dashboard:** https://expo.dev/accounts/jonny_1/projects/cardioia/builds/d125f74e-d39c-469e-9fe4-f90142a1aba8
 
 ```bash
 npx eas-cli login
 npx eas-cli build -p android --profile preview
 ```
 
-- `app.json`: nome, slug e `package`/`bundleIdentifier`
-  (`com.jonathanluft.cardioia`) já configurados.
+- `app.json`: nome, slug, `package`/`bundleIdentifier`
+  (`com.jonathanluft.cardioia`) e `extra.eas.projectId` já configurados
+  (projeto `@jonny_1/cardioia`).
 - `eas.json`: perfil `preview` (build interno, `.apk` direto).
   `env.EXPO_PUBLIC_API_URL` já está preenchido com o túnel ngrok do
   backend (`https://remindful-unsliced-glisten.ngrok-free.dev`, domínio
   fixo — ver `app/backend/README.md#deploy`). O `.apk` só fala com o
-  backend enquanto esse túnel estiver ligado. **Pendente**: rodar o
-  `eas build` em si.
+  backend enquanto esse túnel estiver ligado.
 
 ## Arquivos
 

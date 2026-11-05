@@ -8,8 +8,33 @@ import time
 from collections import deque
 from logging.handlers import RotatingFileHandler
 
+from fastapi import FastAPI, Request
+from prometheus_client import Counter, Histogram
+
 PASTA_LOGS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
 ARQUIVO_LOG = os.path.join(PASTA_LOGS, "app.log")
+
+EVENTOS_RAG = Counter("rag_eventos_total", "Eventos do pipeline RAG, por tipo", ["tipo"])
+
+VERCEL_URL = "fase-7-coracao-sob-controle-previsao.vercel.app"
+
+HTTP_REQUESTS = Counter(
+    "http_requests_total", "Total de requisições HTTP", ["method", "path", "status", "client"]
+)
+HTTP_LATENCY = Histogram(
+    "http_request_duration_seconds", "Duração das requisições HTTP, em segundos", ["method", "path", "client"]
+)
+
+
+def identificar_cliente(request: Request) -> str:
+    """Identifica a origem da requisição (mobile/web/outro) pelo header X-Client-Platform ou pela origem."""
+    client = request.headers.get("x-client-platform")
+    if client in ("mobile", "web"):
+        return client
+    origem = request.headers.get("origin") or request.headers.get("referer") or ""
+    if VERCEL_URL in origem or "localhost:5173" in origem:
+        return "web"
+    return "outro"
 
 
 class FormatadorJSON(logging.Formatter):
@@ -24,7 +49,8 @@ class FormatadorJSON(logging.Formatter):
             "mensagem": record.getMessage(),
         }
         for chave in ("evento", "pergunta_hash", "pergunta_chars", "secoes",
-                      "grounded", "latencia_ms", "chunks", "erro_tipo"):
+                      "grounded", "latencia_ms", "chunks", "erro_tipo",
+                      "client", "otelTraceID", "otelSpanID"):
             if hasattr(record, chave):
                 evento[chave] = getattr(record, chave)
         return json.dumps(evento, ensure_ascii=False)
@@ -69,9 +95,10 @@ class Metricas:
         self.ultimo_erro: dict[str, str] | None = None
 
     def incrementar(self, nome: str):
-        """Incrementa em um o contador com este nome."""
+        """Incrementa em um o contador com este nome (também espelhado no Prometheus)."""
         with self._lock:
             self.contadores[nome] = self.contadores.get(nome, 0) + 1
+        EVENTOS_RAG.labels(tipo=nome).inc()
 
     def registrar_latencia(self, ms: float):
         """Adiciona uma nova amostra de latência à janela."""
@@ -102,3 +129,41 @@ class Metricas:
 
 
 metricas = Metricas()
+
+
+_telemetria_ok = False
+
+
+def configurar_telemetria(app: FastAPI) -> None:
+    """Liga o tracing (OpenTelemetry → Tempo) e instrumenta o FastAPI, o httpx e o SQLAlchemy.
+
+    Sem efeito se OTEL_EXPORTER_OTLP_ENDPOINT não estiver configurado (ex: rodando
+    testes ou fora do docker-compose) — o backend funciona normalmente sem tracing.
+    Idempotente: src/main.py é importado duas vezes no mesmo processo (ver nota
+    acima), então sem essa trava o FastAPI seria instrumentado duas vezes.
+    """
+    global _telemetria_ok
+    if _telemetria_ok:
+        return
+
+    endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+    if not endpoint:
+        return
+
+    from opentelemetry import trace
+    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+    from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+    from opentelemetry.instrumentation.logging import LoggingInstrumentor
+    from opentelemetry.sdk.resources import Resource
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+    provider = TracerProvider(resource=Resource.create({"service.name": "cardioia-backend"}))
+    provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(endpoint=f"{endpoint}/v1/traces")))
+    trace.set_tracer_provider(provider)
+
+    FastAPIInstrumentor.instrument_app(app)
+    HTTPXClientInstrumentor().instrument()
+    LoggingInstrumentor().instrument(set_logging_format=False)
+    _telemetria_ok = True

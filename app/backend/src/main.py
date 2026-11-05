@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -14,11 +15,13 @@ from shared.observabilidade import configurar_logs
 
 configurar_logs()
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from shared.db import Base, engine
+from shared.observabilidade import HTTP_LATENCY, HTTP_REQUESTS, configurar_telemetria, identificar_cliente
 
 from src.modules.auth.router import router as auth_router
 from src.modules.perfil.router import router as perfil_router
@@ -36,6 +39,29 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="CardioIA", lifespan=lifespan)
+configurar_telemetria(app)
+
+
+@app.middleware("http")
+async def medir_requisicoes_http(request: Request, chamar_proximo):
+    """Mede toda requisição HTTP (contagem + latência) com labels de rota, status e cliente de origem."""
+    cliente = identificar_cliente(request)
+    inicio = time.perf_counter()
+    resposta = await chamar_proximo(request)
+    duracao = time.perf_counter() - inicio
+
+    rota = request.scope.get("route")
+    caminho = rota.path if rota else request.url.path
+    HTTP_REQUESTS.labels(method=request.method, path=caminho, status=resposta.status_code, client=cliente).inc()
+    HTTP_LATENCY.labels(method=request.method, path=caminho, client=cliente).observe(duracao)
+    return resposta
+
+
+@app.get("/metrics")
+def metricas_prometheus() -> Response:
+    """Expõe as métricas no formato que o Prometheus raspa."""
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
 
 origens_permitidas = [
     origem.strip()

@@ -30,3 +30,12 @@ paho-mqtt>=2.1.0                 # assina o tópico MQTT publicado pelo ESP32
 # ── Auth (src/modules/auth, shared/db.py) ───────────────────────────────
 sqlalchemy>=2.0.0                # ORM — conta de usuário (Postgres em prod, SQLite em teste)
 psycopg2-binary>=2.9.0           # driver Postgres (wheel pré-compilado, sem libpq-dev)
+
+# ── Observabilidade (shared/observabilidade.py) ──────────────────────────
+prometheus-client>=0.20.0        # métricas expostas em GET /metrics, raspadas pelo Prometheus
+opentelemetry-api>=1.27.0
+opentelemetry-sdk>=1.27.0
+opentelemetry-exporter-otlp-proto-http>=1.27.0   # envia traces pro Tempo
+opentelemetry-instrumentation-fastapi>=0.48b0    # um span por requisição HTTP
+opentelemetry-instrumentation-httpx>=0.48b0      # rastreia as chamadas de LLM (Gemini/OpenAI usam httpx)
+opentelemetry-instrumentation-logging>=0.48b0    # injeta trace_id/span_id nos logs

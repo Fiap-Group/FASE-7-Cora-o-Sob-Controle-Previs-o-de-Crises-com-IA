@@ -231,3 +231,193 @@ button.primario {
   font-size: 0.8rem;
   font-weight: 600;
 }
+
+.nivel-muito-alto {
+  color: var(--nivel-alto);
+  font-weight: 700;
+}
+
+.botoes-aba-secundaria {
+  margin: 8px 0 16px;
+}
+
+.linhaDupla,
+.linha-dinamica {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.linha-dinamica input {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.linha-dinamica input:first-child {
+  flex: 1;
+}
+
+.linha-dinamica input:nth-child(2) {
+  width: 70px;
+}
+
+.botao-remover-linha {
+  width: 36px;
+  padding: 10px 0;
+  font-weight: 700;
+}
+
+.bloco-risco {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 8px 0;
+}
+
+.campo select,
+.campo textarea {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.linkVoltar {
+  display: block;
+  background: none;
+  border: none;
+  color: var(--primary);
+  text-decoration: underline;
+  font-size: 0.9rem;
+  padding: 4px 0 12px;
+  text-align: left;
+}
+
+.ancestralidade-barra {
+  margin-bottom: 12px;
+}
+
+.ancestralidade-barra-linha {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.ancestralidade-barra-trilha {
+  height: 10px;
+  background: var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.ancestralidade-barra-progresso {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 6px;
+}
+
+.chat-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 55vh;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.chat-bolha {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  white-space: pre-wrap;
+  font-size: 0.95rem;
+}
+
+.chat-bolha-usuario {
+  align-self: flex-end;
+  margin-left: auto;
+  background: var(--primary);
+  color: white;
+}
+
+.chat-bolha-ia {
+  align-self: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.chat-fontes {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+}
+
+.chat-fontes-toggle {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  padding: 0;
+  font-size: 0.8rem;
+}
+
+.chat-fonte-item {
+  color: var(--text-secondary);
+  margin: 4px 0;
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.chat-input-row textarea {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.resumo-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.resumo-card-info {
+  flex: 1;
+}
+
+.resumo-card-data {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.resumo-card-info p {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+}
+
+.resumo-card-remover {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+}

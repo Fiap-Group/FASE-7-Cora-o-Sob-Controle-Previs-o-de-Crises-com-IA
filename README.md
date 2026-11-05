@@ -28,7 +28,8 @@ peças de IA compõem o backend:
 - **RAG genômico** — infraestrutura herdada de uma fase anterior: o
   paciente envia o relatório genético e conversa com um agente de IA sobre
   ele, em linguagem simples, com as fontes à vista e aviso de que a
-  resposta é informativa, não um diagnóstico. Só no app mobile.
+  resposta é informativa, não um diagnóstico. Disponível no mobile e no
+  web (o backend indexa um único relatório por vez, sem usuário/sessão).
 - **Modelo preditivo de risco cardíaco** (PyTorch) + **sistema
   multiagente** (OpenAI Agents SDK + Gemini, 4 agentes: Orquestrador →
   Analista de Risco → Especialista em Protocolos → Planejador de
@@ -58,7 +59,7 @@ app/
     app.json, eas.json            # Config do build .apk (EAS Build)
 
   web/                            # App React+Vite — ver app/web/README.md
-    src/                          # App.jsx, Dashboard.jsx, Perfil.jsx, api.js
+    src/                          # App.jsx, Dashboard.jsx, Perfil.jsx, Ancestralidade.jsx, Chat.jsx, api.js
     vercel.json                   # Rotas SPA (deploy na Vercel)
 
   backend/                        # Backend (FastAPI) — ver app/backend/README.md
@@ -133,7 +134,7 @@ npm run dev                           # abre em http://localhost:5173
 |---|---|---|
 | Backend | Túnel ngrok, domínio fixo `remindful-unsliced-glisten.ngrok-free.dev` (ver `app/backend/README.md#deploy`) | Decidido — liga só quando for demonstrar/testar fim-a-fim |
 | Web | **Publicado:** https://fase-7-coracao-sob-controle-previsao.vercel.app (Vercel, Root Directory `app/web`, CI/CD a cada push) | ✅ Feito |
-| Mobile | `.apk` via `eas build` (perfil `preview`). `EXPO_PUBLIC_API_URL` já preenchido em `eas.json` com a URL do ngrok | Decidido — falta rodar `eas build` |
+| Mobile | **Publicado:** https://expo.dev/artifacts/eas/FKk1dMZxV-uv-3azakHxs7ENUqQyzXadmVXr4h0H0FA.apk (`.apk` via `eas build`, perfil `preview` — ver `app/mobile/README.md#gerar-o-apk-eas-build--publicado`) | ✅ Feito |
 
 O túnel ngrok não fica ligado 24/7: o enunciado só exige o backend
 acessível no momento de gravar o vídeo de demonstração (fluxo completo
