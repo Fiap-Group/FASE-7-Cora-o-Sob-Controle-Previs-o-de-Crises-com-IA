@@ -8,7 +8,9 @@ Rodar com: pytest tests/test_preditivo.py
 
 import sys
 from pathlib import Path
+from typing import cast
 
+import pandas as pd
 import pytest
 
 BACKEND = Path(__file__).resolve().parents[1]
@@ -44,7 +46,8 @@ def test_gerar_base_sintetica_tem_5000_linhas_e_as_11_colunas_esperadas():
 
 def test_pico_risco_nao_fica_todo_numa_classe_so():
     df = gerar_base_sintetica(n=5000, seed=42)
-    media = df[COLUNA_ALVO].mean()
+    coluna_alvo = cast(pd.Series, df[COLUNA_ALVO])
+    media = float(coluna_alvo.mean())
     assert 0.05 < media < 0.95
 
 
