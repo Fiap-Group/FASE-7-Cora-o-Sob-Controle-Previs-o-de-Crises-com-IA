@@ -1,3 +1,5 @@
+import { buscarPerfilGenomicoAtual } from './genomicoDb';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 /**
@@ -5,6 +7,91 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
  */
 function mensagemDeErro(corpoErro, mensagemPadrao) {
   return corpoErro.details || corpoErro.error || mensagemPadrao;
+}
+
+let indexadoNestaSessao = false;
+
+/**
+ * Solicita ao backend que apague o índice do relatório genômico, ignorando falhas de conexão.
+ */
+export async function apagarIndiceNoBackend() {
+  try {
+    await fetch(`${API_URL}/api/reset`, { method: 'POST' });
+  } catch (_) {
+    // best-effort: a limpeza local acontece de qualquer forma
+  }
+  indexadoNestaSessao = false;
+}
+
+/**
+ * Indexa o relatório genômico no backend RAG.
+ */
+export async function indexarRelatorio(perfilJson) {
+  const resposta = await fetch(`${API_URL}/api/index`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(perfilJson),
+  });
+
+  if (!resposta.ok) {
+    const erro = await resposta.json().catch(() => ({}));
+    throw new Error(erro.error || 'Falha ao indexar o relatório genômico no backend.');
+  }
+
+  indexadoNestaSessao = true;
+  return resposta.json();
+}
+
+/**
+ * Garante que o relatório salvo neste navegador esteja indexado no backend antes de consultar o agente.
+ */
+async function garantirIndexacao() {
+  if (indexadoNestaSessao) return;
+
+  const perfilSalvo = buscarPerfilGenomicoAtual();
+  if (!perfilSalvo) {
+    throw new Error('Nenhum relatório enviado ainda. Vá até a aba Ancestralidade e envie seu relatório genômico.');
+  }
+
+  await indexarRelatorio(perfilSalvo);
+}
+
+/**
+ * Envia a pergunta ao endpoint de chat do backend.
+ */
+async function chamarChat(pergunta) {
+  return fetch(`${API_URL}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question: pergunta }),
+  });
+}
+
+/**
+ * Envia uma pergunta ao agente RAG e retorna a resposta, reindexando o relatório se necessário.
+ */
+export async function perguntarAoAgente(pergunta) {
+  await garantirIndexacao();
+
+  let resposta = await chamarChat(pergunta);
+
+  if (!resposta.ok) {
+    const erro = await resposta.json().catch(() => ({}));
+
+    const perdeuIndiceNoBackend = resposta.status === 400 && /indexado/i.test(erro.error || '');
+    if (perdeuIndiceNoBackend) {
+      indexadoNestaSessao = false;
+      await garantirIndexacao();
+      resposta = await chamarChat(pergunta);
+    }
+
+    if (!resposta.ok) {
+      const erroFinal = await resposta.json().catch(() => ({}));
+      throw new Error(mensagemDeErro(erroFinal, 'Falha ao consultar o agente.'));
+    }
+  }
+
+  return resposta.json();
 }
 
 /**

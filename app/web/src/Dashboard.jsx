@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { RISCO_CARDIACO_FEATURES } from './riscoCardiacoFeatures';
 import { avaliarRiscoCardiaco, buscarLeituraIot } from './api';
 import Perfil from './Perfil';
+import Ancestralidade from './Ancestralidade';
 
 const VALORES_INICIAIS = Object.fromEntries(RISCO_CARDIACO_FEATURES.map((f) => [f.chave, '']));
 const VALORES_EXEMPLO = Object.fromEntries(RISCO_CARDIACO_FEATURES.map((f) => [f.chave, String(f.exemplo)]));
@@ -115,9 +116,18 @@ export default function Dashboard({ usuario, onSair }) {
         <button type="button" className={aba === 'perfil' ? 'primario' : ''} onClick={() => setAba('perfil')}>
           Perfil
         </button>
+        <button
+          type="button"
+          className={aba === 'ancestralidade' ? 'primario' : ''}
+          onClick={() => setAba('ancestralidade')}
+        >
+          Ancestralidade
+        </button>
       </div>
 
       {aba === 'perfil' && <Perfil usuario={usuario} />}
+
+      {aba === 'ancestralidade' && <Ancestralidade />}
 
       {aba === 'avaliar' && (
         <>

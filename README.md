@@ -28,7 +28,8 @@ peças de IA compõem o backend:
 - **RAG genômico** — infraestrutura herdada de uma fase anterior: o
   paciente envia o relatório genético e conversa com um agente de IA sobre
   ele, em linguagem simples, com as fontes à vista e aviso de que a
-  resposta é informativa, não um diagnóstico. Só no app mobile.
+  resposta é informativa, não um diagnóstico. Disponível no mobile e no
+  web (o backend indexa um único relatório por vez, sem usuário/sessão).
 - **Modelo preditivo de risco cardíaco** (PyTorch) + **sistema
   multiagente** (OpenAI Agents SDK + Gemini, 4 agentes: Orquestrador →
   Analista de Risco → Especialista em Protocolos → Planejador de
@@ -58,7 +59,7 @@ app/
     app.json, eas.json            # Config do build .apk (EAS Build)
 
   web/                            # App React+Vite — ver app/web/README.md
-    src/                          # App.jsx, Dashboard.jsx, Perfil.jsx, api.js
+    src/                          # App.jsx, Dashboard.jsx, Perfil.jsx, Ancestralidade.jsx, Chat.jsx, api.js
     vercel.json                   # Rotas SPA (deploy na Vercel)
 
   backend/                        # Backend (FastAPI) — ver app/backend/README.md
