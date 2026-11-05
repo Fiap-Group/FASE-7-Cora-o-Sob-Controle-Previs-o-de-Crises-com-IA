@@ -3,8 +3,9 @@
 `src/modules/auth/`, que só tem o shape HTTP."""
 
 from datetime import datetime
+from typing import Any
 
-from sqlalchemy import DateTime, Integer, String
+from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .db import Base
@@ -18,3 +19,22 @@ class Usuario(Base):
     senha_hash: Mapped[str] = mapped_column(String, nullable=False)
     nickname: Mapped[str | None] = mapped_column(String, nullable=True)
     criado_em: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now)
+
+
+class HistoricoRisco(Base):
+    """Uma linha por avaliação de risco concluída (src/modules/risco) feita
+    por um usuário logado — fonte de dados do "Perfil" gamificado
+    (src/modules/perfil). Mesmo shape do que o SQLite do mobile já guarda
+    em `avaliacoes_risco` (app/mobile/src/db/database.js), só que
+    centralizado e com `usuario_id`."""
+
+    __tablename__ = "historico_risco"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    usuario_id: Mapped[int] = mapped_column(Integer, ForeignKey("usuarios.id"), nullable=False, index=True)
+    criado_em: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now)
+    dados_json: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    probabilidade: Mapped[float] = mapped_column(Float, nullable=False)
+    classificacao: Mapped[str] = mapped_column(String, nullable=False)
+    protocolos_json: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    recomendacao: Mapped[str] = mapped_column(String, nullable=False)

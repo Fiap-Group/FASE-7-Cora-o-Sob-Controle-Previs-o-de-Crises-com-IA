@@ -43,6 +43,7 @@ from fastapi.responses import JSONResponse
 from shared.db import Base, engine
 
 from src.modules.auth.router import router as auth_router
+from src.modules.perfil.router import router as perfil_router
 from src.modules.rag.router import router as rag_router
 from src.modules.risco.mqtt_listener import iniciar_mqtt_listener
 from src.modules.risco.router import router as risco_router
@@ -89,6 +90,7 @@ async def tratar_http_exception(_request, exc: HTTPException) -> JSONResponse:
 # Cada módulo novo entra aqui como um app.include_router(...) a mais —
 # igual um import de módulo no AppModule do Nest.
 app.include_router(auth_router)
+app.include_router(perfil_router)
 app.include_router(rag_router)
 app.include_router(risco_router)
 

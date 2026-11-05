@@ -15,14 +15,26 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
-BACKEND = Path(__file__).resolve().parents[1]
+BACKEND = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(BACKEND))
 
 from shared.agentes.schemas import RecomendacaoFinal  # noqa: E402
+from shared.db import Base, get_db  # noqa: E402
+from shared.models import HistoricoRisco, Usuario  # noqa: E402
 from src.main import app  # noqa: E402
 from src.modules.risco.dependencies import get_avaliador_risco  # noqa: E402
 from src.modules.risco.mqtt_listener import LeituraIot, get_leitura_iot  # noqa: E402
+
+_engine_teste = create_engine(
+    "sqlite:///:memory:",
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
+_SessionTeste = sessionmaker(bind=_engine_teste)
 
 PACIENTE_EXEMPLO = {
     "idade_media": 60,
@@ -47,11 +59,22 @@ RECOMENDACAO_FAKE = RecomendacaoFinal(
 
 @pytest.fixture
 def cliente() -> Generator[TestClient, None, None]:
+    Base.metadata.create_all(_engine_teste)
+
+    def _get_db_teste() -> Generator:
+        db = _SessionTeste()
+        try:
+            yield db
+        finally:
+            db.close()
+
     app.dependency_overrides[get_avaliador_risco] = lambda: (lambda _dados: RECOMENDACAO_FAKE)
+    app.dependency_overrides[get_db] = _get_db_teste
     try:
         yield TestClient(app)
     finally:
         app.dependency_overrides.clear()
+        Base.metadata.drop_all(_engine_teste)
 
 
 def test_avaliar_risco_devolve_a_recomendacao_do_avaliador(cliente: TestClient):
@@ -123,3 +146,33 @@ def test_leitura_iot_com_mensagem_recebida_devolve_os_valores(cliente: TestClien
     assert corpo["pa_sistolica"] == 85.0
     assert corpo["spo2_media"] == 89.0
     assert corpo["recebido_em"] == agora.isoformat()
+
+
+def test_avaliar_risco_com_usuario_id_grava_historico(cliente: TestClient):
+    db = _SessionTeste()
+    usuario = Usuario(email="paciente@exemplo.com", senha_hash="x:x")
+    db.add(usuario)
+    db.commit()
+    usuario_id = usuario.id
+    db.close()
+
+    resposta = cliente.post("/api/risco/avaliar", json={**PACIENTE_EXEMPLO, "usuario_id": usuario_id})
+    assert resposta.status_code == 200
+
+    db = _SessionTeste()
+    historico = db.query(HistoricoRisco).filter_by(usuario_id=usuario_id).all()
+    db.close()
+
+    assert len(historico) == 1
+    assert historico[0].probabilidade == 0.91
+    assert historico[0].dados_json["fc_media"] == PACIENTE_EXEMPLO["fc_media"]
+
+
+def test_avaliar_risco_sem_usuario_id_nao_grava_historico(cliente: TestClient):
+    cliente.post("/api/risco/avaliar", json=PACIENTE_EXEMPLO)
+
+    db = _SessionTeste()
+    historico = db.query(HistoricoRisco).all()
+    db.close()
+
+    assert historico == []

@@ -5,12 +5,14 @@ import { avaliarRisco } from '../services/riscoService';
 import { buscarLeituraIot } from '../services/api';
 import { avisar } from '../utils/alerta';
 import { colors } from '../theme/colors';
+import { useAuth } from '../context/AuthContext';
 import styles from '../styles/ancestralidadeScreenStyles';
 
 const VALORES_INICIAIS = Object.fromEntries(RISCO_CARDIACO_FEATURES.map((f) => [f.chave, '']));
 const VALORES_EXEMPLO = Object.fromEntries(RISCO_CARDIACO_FEATURES.map((f) => [f.chave, String(f.exemplo)]));
 
 export default function PrevisaoFormScreen({ navigation }) {
+  const { usuario } = useAuth();
   const [valores, setValores] = useState(VALORES_INICIAIS);
   const [enviando, setEnviando] = useState(false);
   const [buscandoIot, setBuscandoIot] = useState(false);
@@ -73,7 +75,7 @@ export default function PrevisaoFormScreen({ navigation }) {
 
     setEnviando(true);
     try {
-      const resultado = await avaliarRisco(payload);
+      const resultado = await avaliarRisco(payload, usuario?.id);
       navigation.navigate('PrevisaoResultado', { resultado });
     } catch (erro) {
       avisar(

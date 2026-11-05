@@ -3,7 +3,7 @@ Testes do módulo preditivo (Fase 6, Parte 1): base sintética, modelo
 PyTorch e avaliação de protocolos. Nada aqui chama LLM nem precisa de chave
 de API — só pandas/numpy/torch/scikit-learn, local e rápido.
 
-Rodar com: pytest tests/test_preditivo.py
+Rodar com: pytest tests/unitarios/test_preditivo.py
 """
 
 import sys
@@ -13,7 +13,7 @@ from typing import cast
 import pandas as pd
 import pytest
 
-BACKEND = Path(__file__).resolve().parents[1]
+BACKEND = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(BACKEND))
 
 from shared.preditivo.dataset import COLUNA_ALVO, COLUNAS_FEATURES, gerar_base_sintetica  # noqa: E402
