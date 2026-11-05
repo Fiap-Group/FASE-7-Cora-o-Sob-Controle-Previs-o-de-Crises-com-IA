@@ -1,4 +1,4 @@
-# Governança e Riscos — Genera Intelligence
+# Governança e Riscos — CardioIA
 
 Documento sobre os limites conhecidos do agente, os disclaimers aplicados e
 a política de privacidade dos dados genéticos manipulados pelo sistema.

@@ -1,4 +1,4 @@
-# Política de Governança de IA — Genera Intelligence (Dasa/Genera)
+# Política de Governança de IA — CardioIA
 
 Este documento define como a solução trata dados pessoais e de saúde, como
 registra eventos da operação e como sustenta a explicabilidade das respostas

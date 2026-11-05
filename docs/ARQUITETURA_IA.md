@@ -1,7 +1,7 @@
-# Arquitetura de IA — Genera Intelligence
+# Arquitetura de IA — CardioIA
 
 Documento técnico da inteligência do sistema: pipeline RAG (`app/backend/shared/rag_system.py`),
-API que o expõe (`app/backend/src/api.py`) e como o front-end consome tudo isso.
+API que o expõe (`app/backend/src/main.py` + `app/backend/src/modules/rag/`) e como o front-end consome tudo isso.
 
 ## Visão geral do fluxo
 

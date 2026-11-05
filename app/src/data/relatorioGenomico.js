@@ -8,7 +8,7 @@ export default {
     data_nascimento: '1985-03-15',
     sexo: 'masculino',
     data_exame: '2024-11-20',
-    laboratorio: 'Dasa/Genera',
+    laboratorio: 'Laboratório Parceiro',
   },
   ancestralidade: {
     composicao: [

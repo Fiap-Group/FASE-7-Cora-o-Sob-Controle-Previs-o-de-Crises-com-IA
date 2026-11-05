@@ -152,7 +152,7 @@ export default function ProfileScreen({ navigation }) {
         data_nascimento: pacienteDataNascimento.trim(),
         sexo: pacienteSexo,
         data_exame: new Date().toLocaleDateString('pt-BR'),
-        laboratorio: 'Dasa/Genera',
+        laboratorio: 'Laboratório Parceiro',
       },
       ancestralidade: { composicao: ancestralidadeValida },
       riscos_doencas: riscosValidos,

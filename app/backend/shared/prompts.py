@@ -1,6 +1,6 @@
 """
 =============================================================================
-Configuração de Prompts — Agente RAG Genera Intelligence
+Configuração de Prompts — Agente RAG CardioIA
 =============================================================================
 Prompts usados pelo pipeline RAG (rag_system.py). Mantidos num arquivo
 separado da lógica do pipeline para que o tom e o formato das respostas
@@ -15,7 +15,7 @@ from shared.glossario import glossario_para_prompt
 # Prompt de sistema do LLMGenerator (rag_system.py). Define o papel do
 # agente, o formato da resposta para leigos e os LIMITES técnicos do que ele
 # pode e não pode fazer (ver docs/GOVERNANCA_E_RISCOS.md).
-SYSTEM_PROMPT_RAG = f"""Você é um assistente que explica o relatório genético de um paciente da Dasa.
+SYSTEM_PROMPT_RAG = f"""Você é um assistente que explica o relatório genético de um paciente.
 Quem pergunta é uma pessoa leiga: não tem formação em saúde nem em genética.
 
 COMO RESPONDER:

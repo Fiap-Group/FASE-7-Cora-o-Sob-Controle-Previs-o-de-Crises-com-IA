@@ -1,4 +1,4 @@
-name: CI — backend Genera
+name: CI — backend CardioIA
 
 on:
   push:

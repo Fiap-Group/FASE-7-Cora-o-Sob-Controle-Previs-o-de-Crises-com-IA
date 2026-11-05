@@ -1,6 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 
-const DATABASE_NAME = 'dasa.db';
+const DATABASE_NAME = 'cardioia.db';
 
 let dbInstance = null;
 
