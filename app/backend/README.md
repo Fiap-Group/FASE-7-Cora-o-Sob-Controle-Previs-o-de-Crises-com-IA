@@ -87,7 +87,7 @@ A API sobe em `http://localhost:5000`, com Swagger em
 | `POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB` | `cardioia`/—/`cardioia` | Credenciais do serviço `db` |
 | `DATABASE_URL` | `postgresql+psycopg2://...@localhost:5432/cardioia` | Sobrescrito para `@db:...` dentro do Docker |
 | `HOST` / `PORT` | `127.0.0.1` / `5000` | Endereço de escuta (Docker usa `0.0.0.0`) |
-| `CORS_ORIGINS` | `http://localhost:8081,http://localhost:19006,http://localhost:5173` | Origens permitidas — em produção, inclua as URLs do mobile/web publicados |
+| `CORS_ORIGINS` | `http://localhost:8081,http://localhost:19006,http://localhost:5173,https://fase-7-coracao-sob-controle-previsao.vercel.app` | Origens permitidas (já inclui a Vercel de produção) |
 
 ## Endpoints
 
@@ -134,12 +134,23 @@ memória). Não chama o LLM de verdade.
 
 ## Deploy
 
-**Ainda em aberto** onde o backend vai ficar publicamente acessível (ex.:
-túnel via ngrok/cloudflared, ou um VPS rodando o `docker-compose.yml` como
-está). Qualquer que seja a opção: publique a porta 5000, aponte
-`CORS_ORIGINS` para as URLs de produção do mobile e do web, e troque
-`EXPO_PUBLIC_API_URL` (`app/mobile/eas.json`) e `VITE_API_URL` (painel da
-Vercel) pra URL final.
+Túnel **ngrok**, com domínio fixo gratuito (não muda entre execuções, então
+o `EXPO_PUBLIC_API_URL`/`VITE_API_URL` só precisam ser preenchidos uma vez):
+
+```bash
+docker compose up -d --build        # backend rodando em localhost:5000
+ngrok http 5000 --url=remindful-unsliced-glisten.ngrok-free.dev
+```
+
+URL pública: `https://remindful-unsliced-glisten.ngrok-free.dev`. Já está
+preenchida em `app/mobile/eas.json` (`EXPO_PUBLIC_API_URL`) e em
+`VITE_API_URL` no painel da Vercel (web já publicado em
+https://fase-7-coracao-sob-controle-previsao.vercel.app).
+
+Não precisa ficar ligado 24/7 — o enunciado só exige o backend acessível
+no momento de testar/gravar a demonstração fim-a-fim. `CORS_ORIGINS` já
+inclui a URL de produção da Vercel (não precisa do domínio do ngrok —
+ele é o endereço do próprio backend, não uma origem que chama o backend).
 
 ## Arquivos
 

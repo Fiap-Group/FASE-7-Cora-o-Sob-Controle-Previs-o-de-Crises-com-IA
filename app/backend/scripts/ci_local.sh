@@ -4,8 +4,11 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-echo "== Testes (unitários + integração, sem chamar o LLM de verdade) =="
-python -m pytest tests/ -q -p no:cacheprovider
+echo "== Testes unitários (modelo preditivo + wiring dos agentes) =="
+python -m pytest tests/unitarios -q -p no:cacheprovider
+
+echo "== Testes de integração (endpoints FastAPI, sem chamar o LLM de verdade) =="
+python -m pytest tests/integracao -q -p no:cacheprovider
 
 echo "== Checagem de tipos (pyright) =="
 python -m pyright

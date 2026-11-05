@@ -132,12 +132,13 @@ npm run dev                           # abre em http://localhost:5173
 
 | Parte | Onde | Status |
 |---|---|---|
-| Backend | A decidir (ex.: túnel ngrok/cloudflared, ou um VPS com o `docker-compose.yml` como está) | **Em aberto** |
-| Web | Vercel (Root Directory `app/web`, `vercel.json` já tem o rewrite de SPA) | Decidido — falta só a URL do backend em `VITE_API_URL` |
-| Mobile | `.apk` via `eas build` (perfil `preview` já configurado em `eas.json`) | Decidido — falta só a URL do backend em `EXPO_PUBLIC_API_URL` |
+| Backend | Túnel ngrok, domínio fixo `remindful-unsliced-glisten.ngrok-free.dev` (ver `app/backend/README.md#deploy`) | Decidido — liga só quando for demonstrar/testar fim-a-fim |
+| Web | **Publicado:** https://fase-7-coracao-sob-controle-previsao.vercel.app (Vercel, Root Directory `app/web`, CI/CD a cada push) | ✅ Feito |
+| Mobile | `.apk` via `eas build` (perfil `preview`). `EXPO_PUBLIC_API_URL` já preenchido em `eas.json` com a URL do ngrok | Decidido — falta rodar `eas build` |
 
-O backend é o bloqueador dos outros dois: web e mobile só recebem a URL
-final depois que ele tiver um endereço público decidido.
+O túnel ngrok não fica ligado 24/7: o enunciado só exige o backend
+acessível no momento de gravar o vídeo de demonstração (fluxo completo
+Wokwi → backend → Vercel/APK), não um hosting permanente.
 
 ### Observabilidade
 

@@ -53,10 +53,12 @@ npx eas-cli build -p android --profile preview
 
 - `app.json`: nome, slug e `package`/`bundleIdentifier`
   (`com.jonathanluft.cardioia`) já configurados.
-- `eas.json`: perfil `preview` (build interno, `.apk` direto). O campo
-  `env.EXPO_PUBLIC_API_URL` precisa ser preenchido com a URL pública do
-  backend antes do build — ainda **pendente**, depende de onde o backend
-  for publicado (ver `app/backend/README.md#deploy`).
+- `eas.json`: perfil `preview` (build interno, `.apk` direto).
+  `env.EXPO_PUBLIC_API_URL` já está preenchido com o túnel ngrok do
+  backend (`https://remindful-unsliced-glisten.ngrok-free.dev`, domínio
+  fixo — ver `app/backend/README.md#deploy`). O `.apk` só fala com o
+  backend enquanto esse túnel estiver ligado. **Pendente**: rodar o
+  `eas build` em si.
 
 ## Arquivos
 
