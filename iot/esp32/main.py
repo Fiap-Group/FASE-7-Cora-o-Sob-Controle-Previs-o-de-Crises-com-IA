@@ -13,11 +13,11 @@ automaticamente ao importar.
 import json
 import time
 
-import network
-from machine import ADC, Pin
-from umqtt.simple import MQTTClient
+import network  # pyright: ignore[reportMissingImports]
+from machine import ADC, Pin  # pyright: ignore[reportMissingImports]
+from umqtt.simple import MQTTClient  # pyright: ignore[reportMissingImports]
 
-from secrets import MQTT_PASSWORD, MQTT_PORT, MQTT_SERVER, MQTT_USER
+from secrets import MQTT_PASSWORD, MQTT_PORT, MQTT_SERVER, MQTT_USER  # pyright: ignore[reportAttributeAccessIssue]
 
 WIFI_SSID = "Wokwi-GUEST"
 WIFI_PASSWORD = ""
