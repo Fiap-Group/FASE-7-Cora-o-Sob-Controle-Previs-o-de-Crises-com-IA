@@ -5,9 +5,9 @@ Observabilidade — logs estruturados e métricas em memória
 Registra eventos da operação (indexação, perguntas respondidas, erros) em
 JSON, um evento por linha, em `logs/app.log` (com rotação) e no console.
 
-Regra de privacidade (ver docs/POLITICA_GOVERNANCA_IA.md): o texto das
-perguntas e o conteúdo do relatório NUNCA entram no log. Registra-se só um
-hash curto da pergunta, o tamanho, a seção recuperada e métricas técnicas.
+Regra de privacidade: o texto das perguntas e o conteúdo do relatório
+NUNCA entram no log. Registra-se só um hash curto da pergunta, o tamanho,
+a seção recuperada e métricas técnicas.
 =============================================================================
 """
 
