@@ -1,13 +1,19 @@
 import json
 import logging
 import os
+import time
 from dataclasses import dataclass
 from datetime import datetime
 
 import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
+from prometheus_client import Counter, Gauge
 
 logger = logging.getLogger("genera_api")
+
+MQTT_MENSAGENS = Counter("mqtt_mensagens_total", "Mensagens MQTT recebidas do ESP32")
+MQTT_ERROS = Counter("mqtt_erros_total", "Erros de conexão ou payload inválido no listener MQTT")
+MQTT_ULTIMA_LEITURA = Gauge("mqtt_ultima_leitura_timestamp", "Timestamp Unix da última leitura válida do ESP32")
 
 
 @dataclass
@@ -39,6 +45,7 @@ def _ao_conectar(
         client.subscribe(topico)
         logger.info("Conectado ao broker MQTT, assinando %s", topico, extra={"evento": "mqtt_conectado"})
     else:
+        MQTT_ERROS.inc()
         logger.warning("Falha ao conectar no broker MQTT: %s", codigo_motivo, extra={"evento": "mqtt_erro"})
 
 
@@ -55,7 +62,10 @@ def _ao_receber_mensagem(_client: mqtt.Client, _userdata: object, msg: mqtt.MQTT
         _leitura.pa_sistolica = float(dados["pa_sistolica"])
         _leitura.spo2_media = float(dados["spo2_media"])
         _leitura.recebido_em = datetime.now()
+        MQTT_MENSAGENS.inc()
+        MQTT_ULTIMA_LEITURA.set(time.time())
     except (ValueError, KeyError, json.JSONDecodeError) as e:
+        MQTT_ERROS.inc()
         logger.warning("Mensagem MQTT em formato inesperado: %s", e, extra={"evento": "mqtt_payload_invalido"})
 
 
@@ -81,4 +91,5 @@ def iniciar_mqtt_listener() -> None:
         client.connect(servidor, porta, keepalive=60)
         client.loop_start()
     except Exception as e:
+        MQTT_ERROS.inc()
         logger.warning("Não foi possível conectar ao broker MQTT agora: %s", e, extra={"evento": "mqtt_erro"})

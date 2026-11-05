@@ -1,0 +1,79 @@
+{
+  "title": "CardioIA — Mobile",
+  "uid": "cardioia-mobile",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1, "type": "timeseries", "title": "Requisições do app mobile, por rota (req/s)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(http_requests_total{client=\"mobile\"}[1m])) by (path)", "legendFormat": "{{path}}" }
+      ]
+    },
+    {
+      "id": 2, "type": "stat", "title": "Taxa de erro HTTP (5xx, %) — mobile",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "100 * sum(rate(http_requests_total{client=\"mobile\", status=~\"5..\"}[5m])) / sum(rate(http_requests_total{client=\"mobile\"}[5m]))" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 1 }, "overrides": [] }
+    },
+    {
+      "id": 3, "type": "stat", "title": "Requisições totais (1h)",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(increase(http_requests_total{client=\"mobile\"}[1h]))" }
+      ]
+    },
+    {
+      "id": 4, "type": "timeseries", "title": "Latência p50/p95 (s) — mobile",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{client=\"mobile\"}[5m])) by (le, path))",
+          "legendFormat": "p50 {{path}}" },
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{client=\"mobile\"}[5m])) by (le, path))",
+          "legendFormat": "p95 {{path}}" }
+      ]
+    },
+    {
+      "id": 5, "type": "bargauge", "title": "Requisições por rota (última 1h) — mobile",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(increase(http_requests_total{client=\"mobile\"}[1h])) by (path)", "legendFormat": "{{path}}" }
+      ]
+    },
+    {
+      "id": 6, "type": "timeseries", "title": "Taxa de erro nos logs — mobile",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        { "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "sum(count_over_time({service=\"backend\", client=\"mobile\", nivel=\"ERROR\"}[1m]))" }
+      ]
+    },
+    {
+      "id": 7, "type": "logs", "title": "Logs recentes — mobile",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        { "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "{service=\"backend\", client=\"mobile\"}" }
+      ]
+    }
+  ]
+}

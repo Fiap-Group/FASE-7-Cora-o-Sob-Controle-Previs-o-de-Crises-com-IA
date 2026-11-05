@@ -8,12 +8,14 @@ const API_URL =
     default: 'http://localhost:5000',
   });
 
+const HEADERS_PADRAO = { 'X-Client-Platform': 'mobile' };
+
 let indexadoNestaSessao = false;
 
 /** Solicita ao backend que apague o índice do paciente, ignorando falhas de conexão. */
 export async function apagarIndiceNoBackend() {
   try {
-    await fetch(`${API_URL}/api/reset`, { method: 'POST' });
+    await fetch(`${API_URL}/api/reset`, { method: 'POST', headers: HEADERS_PADRAO });
   } catch (_) {
   }
   indexadoNestaSessao = false;
@@ -28,7 +30,7 @@ function mensagemDeErro(corpoErro, mensagemPadrao) {
 export async function indexarRelatorio(perfilJson) {
   const resposta = await fetch(`${API_URL}/api/index`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...HEADERS_PADRAO, 'Content-Type': 'application/json' },
     body: JSON.stringify(perfilJson),
   });
 
@@ -57,7 +59,7 @@ async function garantirIndexacao() {
 async function chamarChat(pergunta) {
   return fetch(`${API_URL}/api/chat`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...HEADERS_PADRAO, 'Content-Type': 'application/json' },
     body: JSON.stringify({ question: pergunta }),
   });
 }
@@ -91,7 +93,7 @@ export async function perguntarAoAgente(pergunta) {
 export async function avaliarRiscoCardiaco(dadosOperacao, usuarioId) {
   const resposta = await fetch(`${API_URL}/api/risco/avaliar`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...HEADERS_PADRAO, 'Content-Type': 'application/json' },
     body: JSON.stringify(usuarioId != null ? { ...dadosOperacao, usuario_id: usuarioId } : dadosOperacao),
   });
 
@@ -105,7 +107,7 @@ export async function avaliarRiscoCardiaco(dadosOperacao, usuarioId) {
 
 /** Busca a última leitura do sensor IoT guardada em memória pelo backend. */
 export async function buscarLeituraIot() {
-  const resposta = await fetch(`${API_URL}/api/risco/leitura-iot`);
+  const resposta = await fetch(`${API_URL}/api/risco/leitura-iot`, { headers: HEADERS_PADRAO });
 
   if (!resposta.ok) {
     const erro = await resposta.json().catch(() => ({}));
@@ -119,7 +121,7 @@ export async function buscarLeituraIot() {
 export async function cadastrar(email, senha) {
   const resposta = await fetch(`${API_URL}/api/auth/cadastro`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...HEADERS_PADRAO, 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, senha }),
   });
 
@@ -135,7 +137,7 @@ export async function cadastrar(email, senha) {
 export async function login(email, senha) {
   const resposta = await fetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...HEADERS_PADRAO, 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, senha }),
   });
 
@@ -151,7 +153,7 @@ export async function login(email, senha) {
 export async function definirNickname(usuarioId, nickname) {
   const resposta = await fetch(`${API_URL}/api/auth/nickname`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...HEADERS_PADRAO, 'Content-Type': 'application/json' },
     body: JSON.stringify({ usuario_id: usuarioId, nickname }),
   });
 
@@ -165,7 +167,7 @@ export async function definirNickname(usuarioId, nickname) {
 
 /** Busca o perfil do usuário, incluindo a avaliação de risco mais recente e o histórico. */
 export async function buscarPerfil(usuarioId) {
-  const resposta = await fetch(`${API_URL}/api/perfil/${usuarioId}`);
+  const resposta = await fetch(`${API_URL}/api/perfil/${usuarioId}`, { headers: HEADERS_PADRAO });
 
   if (!resposta.ok) {
     const erro = await resposta.json().catch(() => ({}));

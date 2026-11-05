@@ -21,6 +21,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      tempo:
+        condition: service_started
     # Porta publicada só na interface local. O túnel (cloudflared/ngrok) acessa daqui.
     ports:
       - "127.0.0.1:5000:5000"
@@ -32,13 +34,78 @@ services:
       # Dentro do compose o Postgres é "db", não "localhost" (que é o
       # valor do .env pra rodar o backend fora do container).
       DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-cardioia}:${POSTGRES_PASSWORD:-cardioia}@db:5432/${POSTGRES_DB:-cardioia}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
     volumes:
       # Volume nomeado, não bind mount — não embute o caminho do host. Ver
       # os logs com `docker compose logs -f` ou
-      # `docker compose exec backend cat logs/app.log`.
-      - backend_logs:/app/logs
+      # `docker compose exec backend cat shared/logs/app.log`. É esse
+      # mesmo caminho (shared/logs) que o Promtail lê pra mandar pro Loki.
+      - backend_logs:/app/shared/logs
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-remote-write-receiver
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    restart: unless-stopped
+
+  tempo:
+    image: grafana/tempo
+    command: ["-config.file=/etc/tempo.yml"]
+    volumes:
+      - ./observability/tempo/tempo.yml:/etc/tempo.yml:ro
+      - tempo_data:/var/tempo
+    ports:
+      - "127.0.0.1:3200:3200"
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki
+    command: ["-config.file=/etc/loki/loki-config.yml"]
+    volumes:
+      - ./observability/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki_data:/loki
+    ports:
+      - "127.0.0.1:3100:3100"
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail
+    command: ["-config.file=/etc/promtail/promtail-config.yml"]
+    volumes:
+      - ./observability/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - backend_logs:/var/log/backend:ro
+    depends_on:
+      - loki
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-cardioia}
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/etc/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
     restart: unless-stopped
 
 volumes:
   backend_logs:
   postgres_data:
+  prometheus_data:
+  tempo_data:
+  loki_data:
+  grafana_data:

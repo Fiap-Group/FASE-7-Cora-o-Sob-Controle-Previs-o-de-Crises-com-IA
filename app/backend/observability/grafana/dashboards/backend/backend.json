@@ -1,0 +1,121 @@
+{
+  "title": "CardioIA — Backend",
+  "uid": "cardioia-backend",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1, "type": "timeseries", "title": "Requisições HTTP por rota (req/s)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(http_requests_total[1m])) by (path)", "legendFormat": "{{path}}" }
+      ]
+    },
+    {
+      "id": 2, "type": "stat", "title": "Taxa de erro HTTP (5xx, %)",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "100 * sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m]))" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 1 }, "overrides": [] }
+    },
+    {
+      "id": 3, "type": "stat", "title": "Respostas RAG sem ancoragem (%)",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "100 * rag_eventos_total{tipo=\"respostas_sem_ancoragem\"} / rag_eventos_total{tipo=\"perguntas\"}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 1 }, "overrides": [] }
+    },
+    {
+      "id": 4, "type": "timeseries", "title": "Latência HTTP p50/p95 (s)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, path))",
+          "legendFormat": "p50 {{path}}" },
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, path))",
+          "legendFormat": "p95 {{path}}" }
+      ]
+    },
+    {
+      "id": 5, "type": "timeseries", "title": "Eventos do pipeline RAG (por minuto)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(rag_eventos_total[5m])) by (tipo) * 60", "legendFormat": "{{tipo}}" }
+      ]
+    },
+    {
+      "id": 6, "type": "timeseries", "title": "Latência por agente do multiagente (p95, s)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket[5m])) by (le, span_name))",
+          "legendFormat": "{{span_name}}" }
+      ],
+      "description": "Gerado automaticamente pelo metrics-generator do Tempo a partir dos spans (um por agente)."
+    },
+    {
+      "id": 7, "type": "timeseries", "title": "Chamadas por agente (taxa)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(traces_spanmetrics_calls_total[5m])) by (span_name)", "legendFormat": "{{span_name}}" }
+      ]
+    },
+    {
+      "id": 8, "type": "timeseries", "title": "MQTT — mensagens e erros (por minuto)",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 24 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "rate(mqtt_mensagens_total[1m]) * 60", "legendFormat": "mensagens" },
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "rate(mqtt_erros_total[1m]) * 60", "legendFormat": "erros" }
+      ]
+    },
+    {
+      "id": 9, "type": "stat", "title": "Segundos desde a última leitura do sensor",
+      "gridPos": { "h": 8, "w": 4, "x": 8, "y": 24 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "time() - mqtt_ultima_leitura_timestamp" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] }
+    },
+    {
+      "id": 10, "type": "timeseries", "title": "Taxa de erro nos logs",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        { "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "sum(count_over_time({service=\"backend\", nivel=\"ERROR\"}[1m]))" }
+      ]
+    },
+    {
+      "id": 11, "type": "logs", "title": "Logs recentes (ERROR)",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 32 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        { "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "{service=\"backend\", nivel=\"ERROR\"}" }
+      ]
+    }
+  ]
+}
