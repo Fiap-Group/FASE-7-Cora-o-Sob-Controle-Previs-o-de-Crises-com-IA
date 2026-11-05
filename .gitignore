@@ -55,3 +55,6 @@ __pycache__/
 
 # IoT (ESP32/MicroPython)
 iot/esp32/secrets.py
+
+# scripts/subir-local.sh (ngrok/mobile/web em background)
+/logs/
