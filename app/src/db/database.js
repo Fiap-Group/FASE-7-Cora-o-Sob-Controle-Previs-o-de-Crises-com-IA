@@ -48,6 +48,16 @@ export async function initDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       aceito_em TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS avaliacoes_risco (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      criado_em TEXT NOT NULL,
+      dados_json TEXT NOT NULL,
+      probabilidade REAL NOT NULL,
+      classificacao TEXT NOT NULL,
+      protocolos_json TEXT NOT NULL,
+      recomendacao TEXT NOT NULL
+    );
   `);
 }
 
@@ -74,6 +84,7 @@ export async function apagarTodosOsDados() {
     await db.runAsync('DELETE FROM sessoes_chat');
     await db.runAsync('DELETE FROM perfil_genomico');
     await db.runAsync('DELETE FROM consentimento');
+    await db.runAsync('DELETE FROM avaliacoes_risco');
   });
 }
 
@@ -167,4 +178,47 @@ export async function buscarPerfilGenomicoAtual() {
     'SELECT dados_json FROM perfil_genomico ORDER BY id DESC LIMIT 1'
   );
   return linha ? JSON.parse(linha.dados_json) : null;
+}
+
+// Guarda o payload enviado e a recomendação completa do sistema multiagente
+// de risco cardíaco (ver services/riscoService.js).
+export async function criarAvaliacaoRisco(dadosOperacao, resultado) {
+  const db = await getDatabase();
+  const agora = new Date().toISOString();
+  const inserido = await db.runAsync(
+    `INSERT INTO avaliacoes_risco
+       (criado_em, dados_json, probabilidade, classificacao, protocolos_json, recomendacao)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [
+      agora,
+      JSON.stringify(dadosOperacao),
+      resultado.probabilidade,
+      resultado.classificacao,
+      JSON.stringify(resultado.protocolos),
+      resultado.recomendacao,
+    ]
+  );
+  return {
+    id: inserido.lastInsertRowId,
+    criado_em: agora,
+    dados: dadosOperacao,
+    ...resultado,
+  };
+}
+
+export async function buscarAvaliacoesRisco() {
+  const db = await getDatabase();
+  const linhas = await db.getAllAsync(
+    `SELECT id, criado_em, dados_json, probabilidade, classificacao, protocolos_json, recomendacao
+     FROM avaliacoes_risco ORDER BY id DESC`
+  );
+  return linhas.map((linha) => ({
+    id: linha.id,
+    criado_em: linha.criado_em,
+    dados: JSON.parse(linha.dados_json),
+    probabilidade: linha.probabilidade,
+    classificacao: linha.classificacao,
+    protocolos: JSON.parse(linha.protocolos_json),
+    recomendacao: linha.recomendacao,
+  }));
 }

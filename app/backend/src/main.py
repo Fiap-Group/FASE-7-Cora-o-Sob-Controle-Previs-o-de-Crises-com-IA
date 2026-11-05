@@ -39,6 +39,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from src.modules.rag.router import router as rag_router
+from src.modules.risco.router import router as risco_router
 
 app = FastAPI(title="CardioIA")
 
@@ -62,10 +63,10 @@ async def tratar_http_exception(_request, exc: HTTPException) -> JSONResponse:
     return JSONResponse(status_code=exc.status_code, content={"error": exc.detail})
 
 
-# Cada módulo novo (preditivo, agentes, ...) entra aqui como um
-# app.include_router(...) a mais — igual um import de módulo no AppModule
-# do Nest.
+# Cada módulo novo entra aqui como um app.include_router(...) a mais —
+# igual um import de módulo no AppModule do Nest.
 app.include_router(rag_router)
+app.include_router(risco_router)
 
 
 if __name__ == "__main__":

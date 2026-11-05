@@ -23,6 +23,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from shared.observabilidade import hash_pergunta, metricas
 from shared.rag_system import GenomicRAGPipeline
 
+from src.common.erros import erro_interno as _erro_interno_compartilhado
+
 from .dependencies import EstadoIndexacao, get_estado, get_pipeline, get_pipeline_if_exists
 from .schemas import ChatRequest, ChatResponse, FonteResposta, HealthResponse, IndexResponse, ResetResponse
 
@@ -32,10 +34,7 @@ router = APIRouter(prefix="/api", tags=["rag"])
 
 
 def erro_interno(contexto: str, excecao: Exception, status: int = 500) -> HTTPException:
-    """Loga o erro completo no servidor e devolve ao cliente só uma mensagem genérica."""
-    logger.exception(contexto, extra={"evento": "erro", "erro_tipo": type(excecao).__name__})
-    metricas.registrar_erro(f"{contexto}: {type(excecao).__name__}")
-    return HTTPException(status_code=status, detail=contexto)
+    return _erro_interno_compartilhado(logger, contexto, excecao, status)
 
 
 @router.get("/health", response_model=HealthResponse)

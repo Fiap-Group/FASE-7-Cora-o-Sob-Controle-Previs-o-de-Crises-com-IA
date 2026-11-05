@@ -98,3 +98,24 @@ export async function perguntarAoAgente(pergunta) {
 
   return resposta.json();
 }
+
+// Envia os dados de operação hospitalar ao sistema multiagente de previsão
+// de risco cardíaco e retorna { probabilidade, classificacao, protocolos,
+// recomendacao }. Pode levar vários segundos: a resposta passa por uma
+// cadeia de agentes (Orquestrador -> Analista de Risco -> Especialista em
+// Protocolos -> Planejador de Resposta), cada um com sua própria chamada ao
+// Gemini.
+export async function avaliarRiscoCardiaco(dadosOperacao) {
+  const resposta = await fetch(`${API_URL}/api/risco/avaliar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dadosOperacao),
+  });
+
+  if (!resposta.ok) {
+    const erro = await resposta.json().catch(() => ({}));
+    throw new Error(mensagemDeErro(erro, 'Falha ao avaliar o risco cardíaco.'));
+  }
+
+  return resposta.json();
+}

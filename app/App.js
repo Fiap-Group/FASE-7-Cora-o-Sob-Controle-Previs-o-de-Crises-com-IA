@@ -20,6 +20,7 @@ import DashboardScreen from './src/screens/DashboardScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import AnaliseStack from './src/navigation/AnaliseStack';
+import PrevisaoStack from './src/navigation/PrevisaoStack';
 const Tab = createBottomTabNavigator();
 
 export default function App() {
@@ -89,6 +90,17 @@ export default function App() {
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
               <Text style={{ fontSize: size / 2, color, fontFamily: fonts.bold }}>ANÁLISE</Text>
+            ),
+          }}
+        />
+
+        <Tab.Screen
+          name="Previsão"
+          component={PrevisaoStack}
+          options={{
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <Text style={{ fontSize: size / 2, color, fontFamily: fonts.bold }}>PREVISÃO</Text>
             ),
           }}
         />
