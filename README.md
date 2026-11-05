@@ -123,7 +123,6 @@ npm run dev                           # abre em http://localhost:5173
 
 - Testes e checagem de tipos (sem chamar o Gemini): `bash app/backend/scripts/ci_local.sh`.
 - Treinar o modelo preditivo: `python -m shared.preditivo.treinar`, em `app/backend`.
-- Demo do multiagente (precisa de `GEMINI_API_KEY`): `python -m shared.agentes.demo`, em `app/backend`.
 - Detalhes de cada parte (endpoints, variáveis de ambiente, lógica de
   negócio): `app/backend/README.md`, `app/mobile/README.md`,
   `app/web/README.md`.

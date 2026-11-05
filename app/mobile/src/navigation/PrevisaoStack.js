@@ -6,6 +6,7 @@ import { fonts } from '../theme/typography';
 
 const Stack = createNativeStackNavigator();
 
+/** Define a navegação em pilha entre o formulário de previsão de risco e seu resultado. */
 export default function PrevisaoStack() {
   return (
     <Stack.Navigator

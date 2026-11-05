@@ -1,13 +1,3 @@
-"""
-Testes dos endpoints do módulo risco: POST /api/risco/avaliar e
-GET /api/risco/leitura-iot.
-
-Não chamam o Gemini nem o broker MQTT de verdade: o avaliador (fluxo
-multiagente) e a leitura de IoT são substituídos por fakes via
-`app.dependency_overrides`, igual ao padrão já usado em test_sprint4.py
-para o pipeline RAG.
-"""
-
 import sys
 from collections.abc import Generator
 from datetime import datetime
@@ -59,9 +49,11 @@ RECOMENDACAO_FAKE = RecomendacaoFinal(
 
 @pytest.fixture
 def cliente() -> Generator[TestClient, None, None]:
+    """Cria um cliente de teste com um avaliador de risco fake e SQLite em memória."""
     Base.metadata.create_all(_engine_teste)
 
     def _get_db_teste() -> Generator:
+        """Fornece uma sessão do banco de teste."""
         db = _SessionTeste()
         try:
             yield db
@@ -78,6 +70,7 @@ def cliente() -> Generator[TestClient, None, None]:
 
 
 def test_avaliar_risco_devolve_a_recomendacao_do_avaliador(cliente: TestClient):
+    """Testa que a avaliação de risco devolve a recomendação do avaliador."""
     resposta = cliente.post("/api/risco/avaliar", json=PACIENTE_EXEMPLO)
 
     assert resposta.status_code == 200
@@ -89,6 +82,7 @@ def test_avaliar_risco_devolve_a_recomendacao_do_avaliador(cliente: TestClient):
 
 
 def test_avaliar_risco_payload_com_campo_faltando_retorna_422(cliente: TestClient):
+    """Testa que um payload sem um campo obrigatório é rejeitado."""
     payload_incompleto = {k: v for k, v in PACIENTE_EXEMPLO.items() if k != "spo2_media"}
 
     resposta = cliente.post("/api/risco/avaliar", json=payload_incompleto)
@@ -97,6 +91,7 @@ def test_avaliar_risco_payload_com_campo_faltando_retorna_422(cliente: TestClien
 
 
 def test_avaliar_risco_payload_com_tipo_errado_retorna_422(cliente: TestClient):
+    """Testa que um payload com um campo de tipo errado é rejeitado."""
     payload_invalido = {**PACIENTE_EXEMPLO, "fc_media": "muito alta"}
 
     resposta = cliente.post("/api/risco/avaliar", json=payload_invalido)
@@ -105,7 +100,9 @@ def test_avaliar_risco_payload_com_tipo_errado_retorna_422(cliente: TestClient):
 
 
 def test_avaliar_risco_erro_do_avaliador_nao_vaza_detalhe_ao_cliente(cliente: TestClient):
+    """Testa que um erro interno do avaliador não expõe detalhes ao cliente."""
     def avaliador_quebrado(_dados: dict) -> RecomendacaoFinal:
+        """Simula uma falha do avaliador de risco."""
         raise ValueError("Cota do Gemini esgotada (detalhe interno)")
 
     app.dependency_overrides[get_avaliador_risco] = lambda: avaliador_quebrado
@@ -117,6 +114,7 @@ def test_avaliar_risco_erro_do_avaliador_nao_vaza_detalhe_ao_cliente(cliente: Te
 
 
 def test_leitura_iot_sem_mensagem_ainda_devolve_desconectado(cliente: TestClient):
+    """Testa que, sem nenhuma mensagem MQTT recebida, a leitura vem desconectada."""
     app.dependency_overrides[get_leitura_iot] = lambda: LeituraIot()
 
     resposta = cliente.get("/api/risco/leitura-iot")
@@ -131,6 +129,7 @@ def test_leitura_iot_sem_mensagem_ainda_devolve_desconectado(cliente: TestClient
 
 
 def test_leitura_iot_com_mensagem_recebida_devolve_os_valores(cliente: TestClient):
+    """Testa que a leitura devolve os valores da última mensagem MQTT recebida."""
     agora = datetime(2026, 1, 1, 12, 0, 0)
     leitura_fake = LeituraIot(
         conectado=True, fc_media=125.0, pa_sistolica=85.0, spo2_media=89.0, recebido_em=agora
@@ -149,6 +148,7 @@ def test_leitura_iot_com_mensagem_recebida_devolve_os_valores(cliente: TestClien
 
 
 def test_avaliar_risco_com_usuario_id_grava_historico(cliente: TestClient):
+    """Testa que avaliar o risco com um usuario_id grava o histórico dessa avaliação."""
     db = _SessionTeste()
     usuario = Usuario(email="paciente@exemplo.com", senha_hash="x:x")
     db.add(usuario)
@@ -169,6 +169,7 @@ def test_avaliar_risco_com_usuario_id_grava_historico(cliente: TestClient):
 
 
 def test_avaliar_risco_sem_usuario_id_nao_grava_historico(cliente: TestClient):
+    """Testa que avaliar o risco sem usuario_id não grava nenhum histórico."""
     cliente.post("/api/risco/avaliar", json=PACIENTE_EXEMPLO)
 
     db = _SessionTeste()

@@ -1,6 +1,7 @@
 import { Text, TouchableOpacity, View } from 'react-native';
 import styles from '../styles/resumoCardStyles';
 
+/** Formata uma data ISO para o padrão "dd/mm/aaaa às hh:mm" em português. */
 function formatarDataHora(dataIso) {
   const data = new Date(dataIso);
   const dataFormatada = data.toLocaleDateString('pt-BR');
@@ -8,10 +9,7 @@ function formatarDataHora(dataIso) {
   return `${dataFormatada} às ${horaFormatada}`;
 }
 
-// Lixeira e área de abrir o chat são TouchableOpacity IRMÃS (não uma dentro
-// da outra) — TouchableOpacity aninhada em TouchableOpacity é instável no
-// react-native-web (o sistema de "responder" às vezes não dispara nenhuma
-// das duas).
+/** Exibe um cartão de resumo com data de criação, permitindo abrir ou remover. */
 export default function ResumoCard({ dataCriacao, onPress, onRemover }) {
   return (
     <View style={styles.card}>

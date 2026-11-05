@@ -3,9 +3,7 @@ import { encerrarSessao, obterUsuarioLogado } from '../db/database';
 
 const AuthContext = createContext(null);
 
-// `usuario` vem da sessão lembrada NESTE aparelho (SQLite local), não de
-// uma chamada ao backend — isso só acontece nas telas de Login/Cadastro
-// (ver LoginScreen.js/CadastroScreen.js).
+/** Provedor de contexto que mantém o usuário logado e expõe ações de sessão. */
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
   const [carregando, setCarregando] = useState(true);
@@ -28,6 +26,7 @@ export function AuthProvider({ children }) {
   );
 }
 
+/** Hook de acesso ao contexto de autenticação. */
 export function useAuth() {
   return useContext(AuthContext);
 }

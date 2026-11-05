@@ -1,8 +1,3 @@
-// As 10 features que o backend espera para prever o risco de crise cardíaca
-// (ver app/backend/shared/preditivo/dataset.py:COLUNAS_FEATURES). As chaves
-// aqui precisam ser idênticas às de lá — é o contrato entre front e backend.
-// Mesma lista de app/mobile/src/data/riscoCardiacoFeatures.js — duplicada de
-// propósito, os dois front-ends são projetos npm independentes.
 export const RISCO_CARDIACO_FEATURES = [
   { chave: 'idade_media', label: 'Idade média dos pacientes', unidade: 'anos', exemplo: 60 },
   { chave: 'carga_sistema', label: 'Carga do sistema', unidade: '%', exemplo: 90 },

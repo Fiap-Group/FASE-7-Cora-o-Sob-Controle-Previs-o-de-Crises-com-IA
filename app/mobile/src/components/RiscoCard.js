@@ -16,6 +16,7 @@ const NIVEL_LABEL = {
   'muito alto': 'Risco Muito Alto',
 };
 
+/** Exibe um cartão com a condição, nível de risco e descrição associada. */
 export default function RiscoCard({ condicao, nivel, descricao }) {
   const status = NIVEL_STATUS[nivel] ?? colors.status.good;
 

@@ -2,9 +2,6 @@ import { StyleSheet } from 'react-native';
 import { colors } from '../theme/colors';
 import { fonts } from '../theme/typography';
 
-// Mesmo vocabulário visual de ancestralidadeScreenStyles.js (formulario,
-// campo, inputTexto, botaoPrimario) — compartilhado por Login, Cadastro
-// e EscolherNickname.
 export default StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20, flexGrow: 1, justifyContent: 'center' },

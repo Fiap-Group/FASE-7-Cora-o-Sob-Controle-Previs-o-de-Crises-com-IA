@@ -1,23 +1,3 @@
-"""
-=============================================================================
-Definição dos 4 agentes — Fase 6, Parte 2
-=============================================================================
-Cadeia linear de handoffs (cada agente só encaminha pro próximo, nunca
-volta pro anterior — mais fácil de um LLM seguir de forma confiável do que
-um hub-and-spoke que teria que voltar pro Orquestrador):
-
-    Orquestrador
-        -> Agente Analista de Risco        (tool: ferramenta_prever_risco)
-        -> Agente Especialista em Protocolos (tool: ferramenta_buscar_protocolos)
-        -> Agente Planejador de Resposta     (output_type: RecomendacaoFinal)
-
-Isso é diferente de uma entrega anterior, que criava o Orquestrador com
-handoffs configurados mas nunca de fato chamava `Runner.run` nele — aqui
-`orquestracao.py` chama `Runner.run` só no Orquestrador, então os handoffs
-sempre são exercitados de verdade.
-=============================================================================
-"""
-
 from agents import Agent, handoff
 
 from shared.agentes.llm_config import obter_modelo_gemini
@@ -26,11 +6,7 @@ from shared.agentes.tools import ferramenta_buscar_protocolos, ferramenta_prever
 
 
 def construir_todos_os_agentes() -> dict[str, Agent]:
-    """Monta os 4 agentes e devolve todos eles, nomeados — útil pra testes
-    estruturais, que não têm como inspecionar o agente de destino de dentro
-    de um `Handoff` (a SDK não expõe isso como atributo público). Quem só
-    precisa rodar o fluxo usa `construir_agentes()`, que devolve só o
-    Orquestrador."""
+    """Monta os 4 agentes do fluxo multiagente e devolve todos eles, nomeados."""
     modelo = obter_modelo_gemini()
 
     planejador_resposta = Agent(
@@ -106,6 +82,5 @@ def construir_todos_os_agentes() -> dict[str, Agent]:
 
 
 def construir_agentes() -> Agent:
-    """Ponto de entrada do fluxo real: só o Orquestrador (os outros 3
-    agentes são alcançados por handoff, a partir dele)."""
+    """Ponto de entrada do fluxo real: devolve só o Agente Orquestrador."""
     return construir_todos_os_agentes()["orquestrador"]

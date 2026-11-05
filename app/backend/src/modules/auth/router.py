@@ -1,19 +1,3 @@
-"""
-=============================================================================
-Controller do módulo de autenticação (equivalente a um @Controller do Nest)
-=============================================================================
-Conta de usuário compartilhada entre mobile e web — a única coisa dos
-dois front-ends que precisa de um banco de verdade (Postgres), em vez de
-ficar em memória como o resto do backend. Ver shared/db.py e
-shared/models.py.
-
-Endpoints:
-    POST /api/auth/cadastro    cria a conta (e-mail + senha)
-    POST /api/auth/login       autentica e devolve o usuário
-    POST /api/auth/nickname    define o nickname de uma conta já criada
-=============================================================================
-"""
-
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -30,6 +14,7 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 @router.post("/cadastro", response_model=UsuarioResponse, status_code=201)
 def cadastro(body: CadastroRequest, db: Session = Depends(get_db)) -> UsuarioResponse:
+    """Cria uma nova conta de usuário a partir de e-mail e senha."""
     try:
         usuario = service.criar_usuario(db, body.email, body.senha)
     except service.EmailInvalido as e:
@@ -43,6 +28,7 @@ def cadastro(body: CadastroRequest, db: Session = Depends(get_db)) -> UsuarioRes
 
 @router.post("/login", response_model=UsuarioResponse)
 def login(body: LoginRequest, db: Session = Depends(get_db)) -> UsuarioResponse:
+    """Autentica o usuário pelo e-mail e senha e devolve seus dados."""
     usuario = service.autenticar(db, body.email, body.senha)
     if not usuario:
         raise HTTPException(status_code=401, detail="E-mail ou senha inválidos")
@@ -52,6 +38,7 @@ def login(body: LoginRequest, db: Session = Depends(get_db)) -> UsuarioResponse:
 
 @router.post("/nickname", response_model=UsuarioResponse)
 def nickname(body: NicknameRequest, db: Session = Depends(get_db)) -> UsuarioResponse:
+    """Define o nickname de uma conta já criada."""
     usuario = service.definir_nickname(db, body.usuario_id, body.nickname)
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")

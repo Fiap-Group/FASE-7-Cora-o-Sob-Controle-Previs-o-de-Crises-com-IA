@@ -1,16 +1,3 @@
-"""
-=============================================================================
-Observabilidade — logs estruturados e métricas em memória
-=============================================================================
-Registra eventos da operação (indexação, perguntas respondidas, erros) em
-JSON, um evento por linha, em `logs/app.log` (com rotação) e no console.
-
-Regra de privacidade: o texto das perguntas e o conteúdo do relatório
-NUNCA entram no log. Registra-se só um hash curto da pergunta, o tamanho,
-a seção recuperada e métricas técnicas.
-=============================================================================
-"""
-
 from typing import Any
 import hashlib
 import json
@@ -26,14 +13,16 @@ ARQUIVO_LOG = os.path.join(PASTA_LOGS, "app.log")
 
 
 class FormatadorJSON(logging.Formatter):
+    """Formata cada registro de log como uma linha JSON."""
+
     def format(self, record: logging.LogRecord) -> str:
+        """Converte um registro de log em uma string JSON com os campos relevantes."""
         evento: dict[str, object] = {
             "ts": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(record.created)),
             "nivel": record.levelname,
             "logger": record.name,
             "mensagem": record.getMessage(),
         }
-        # Campos extras passados via `extra={...}` nas chamadas de log.
         for chave in ("evento", "pergunta_hash", "pergunta_chars", "secoes",
                       "grounded", "latencia_ms", "chunks", "erro_tipo"):
             if hasattr(record, chave):
@@ -42,6 +31,7 @@ class FormatadorJSON(logging.Formatter):
 
 
 def configurar_logs():
+    """Configura o logger raiz com handlers de arquivo (com rotação) e console, em JSON."""
     os.makedirs(PASTA_LOGS, exist_ok=True)
     raiz = logging.getLogger()
     raiz.setLevel(logging.INFO)
@@ -57,14 +47,15 @@ def configurar_logs():
 
 
 def hash_pergunta(texto: str) -> str:
-    """Identificador curto e não reversível de uma pergunta (para correlacionar logs)."""
+    """Gera um identificador curto e não reversível de uma pergunta, usado para correlacionar logs."""
     return hashlib.sha256(texto.encode("utf-8")).hexdigest()[:12]
 
 
 class Metricas:
-    """Contadores e latências em memória. Zeram ao reiniciar o backend."""
+    """Contadores e latências em memória, reiniciados sempre que o backend sobe."""
 
     def __init__(self, tamanho_janela: int = 500):
+        """Inicializa os contadores e a janela de latências."""
         self._lock = threading.Lock()
         self.iniciado_em = time.time()
         self.contadores: dict[str, int] = {
@@ -78,22 +69,27 @@ class Metricas:
         self.ultimo_erro: dict[str, str] | None = None
 
     def incrementar(self, nome: str):
+        """Incrementa em um o contador com este nome."""
         with self._lock:
             self.contadores[nome] = self.contadores.get(nome, 0) + 1
 
     def registrar_latencia(self, ms: float):
+        """Adiciona uma nova amostra de latência à janela."""
         with self._lock:
             self.latencias_ms.append(ms)
 
     def registrar_erro(self, mensagem: str):
+        """Guarda o último erro ocorrido, com data e mensagem."""
         with self._lock:
             self.ultimo_erro = {"em": time.strftime("%Y-%m-%dT%H:%M:%S"), "mensagem": mensagem}
 
     def resumo(self) -> dict[str, Any]:
+        """Monta um resumo atual das métricas: uptime, contadores e percentis de latência."""
         with self._lock:
             ordenadas: list[float] = sorted(self.latencias_ms)
 
             def percentil(p: float) -> float | None:
+                """Calcula o percentil `p` das latências ordenadas."""
                 if not ordenadas:
                     return None
                 return round(ordenadas[min(len(ordenadas) - 1, int(p * len(ordenadas)))], 1)

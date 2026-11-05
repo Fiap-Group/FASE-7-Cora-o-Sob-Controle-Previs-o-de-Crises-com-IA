@@ -1,6 +1,7 @@
 import { View, Text } from 'react-native';
 import styles from '../styles/ancestralidadeBarraStyles';
 
+/** Exibe uma barra de progresso representando o percentual de ancestralidade de uma região. */
 export default function AncestralidadeBarra({ regiao, percentual }) {
   return (
     <View style={styles.container}>

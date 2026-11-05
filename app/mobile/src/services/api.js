@@ -1,10 +1,6 @@
 import { Platform } from 'react-native';
 import { buscarPerfilGenomicoAtual } from '../db/database';
 
-// Backend RAG (ver /backend). Em produção (front publicado na nuvem), a URL
-// vem de EXPO_PUBLIC_API_URL, apontando para o túnel do backend. Sem essa
-// variável, usa o localhost de desenvolvimento. O emulador Android não
-// enxerga "localhost" da máquina host, por isso usa 10.0.2.2 nesse caso.
 const API_URL =
   process.env.EXPO_PUBLIC_API_URL ||
   Platform.select({
@@ -14,25 +10,21 @@ const API_URL =
 
 let indexadoNestaSessao = false;
 
-// Pede ao backend que esqueça o índice do paciente. Não lança erro se o
-// backend estiver fora do ar: os dados do dispositivo são apagados mesmo assim.
+/** Solicita ao backend que apague o índice do paciente, ignorando falhas de conexão. */
 export async function apagarIndiceNoBackend() {
   try {
     await fetch(`${API_URL}/api/reset`, { method: 'POST' });
   } catch (_) {
-    // backend indisponível: nada a apagar na memória dele
   }
   indexadoNestaSessao = false;
 }
 
-// O backend devolve { error, details }: "details" costuma ter a explicação
-// mais útil (ex: "cota diária esgotada"), então preferimos ela quando existe.
+/** Extrai a mensagem de erro mais útil da resposta do backend. */
 function mensagemDeErro(corpoErro, mensagemPadrao) {
   return corpoErro.details || corpoErro.error || mensagemPadrao;
 }
 
-// Indexa o relatório genômico do usuário no backend RAG. Chamado explicitamente
-// pela tela Ancestralidade quando o usuário envia um relatório novo.
+/** Indexa o relatório genômico do usuário no backend RAG. */
 export async function indexarRelatorio(perfilJson) {
   const resposta = await fetch(`${API_URL}/api/index`, {
     method: 'POST',
@@ -49,6 +41,7 @@ export async function indexarRelatorio(perfilJson) {
   return resposta.json();
 }
 
+/** Garante que o relatório salvo localmente esteja indexado no backend antes de consultar o agente. */
 async function garantirIndexacao() {
   if (indexadoNestaSessao) return;
 
@@ -60,6 +53,7 @@ async function garantirIndexacao() {
   await indexarRelatorio(perfilSalvo);
 }
 
+/** Envia a pergunta ao endpoint de chat do backend. */
 async function chamarChat(pergunta) {
   return fetch(`${API_URL}/api/chat`, {
     method: 'POST',
@@ -68,9 +62,7 @@ async function chamarChat(pergunta) {
   });
 }
 
-// Envia uma pergunta ao agente RAG e retorna { answer, sources, grounded }.
-// Lança erro se o backend (backend/api.py) não estiver rodando, sem chave de
-// LLM configurada, ou se nenhum relatório tiver sido enviado ainda.
+/** Envia uma pergunta ao agente RAG e retorna a resposta, reindexando o relatório se necessário. */
 export async function perguntarAoAgente(pergunta) {
   await garantirIndexacao();
 
@@ -79,10 +71,6 @@ export async function perguntarAoAgente(pergunta) {
   if (!resposta.ok) {
     const erro = await resposta.json().catch(() => ({}));
 
-    // O índice do RAG vive em memória no backend: se o processo foi
-    // reiniciado (ex: derrubou e subiu o api.py de novo) mas o app ainda
-    // acha que já indexou nesta sessão, reindexa a partir do relatório
-    // salvo no SQLite e tenta de novo, uma vez, antes de desistir.
     const perdeuIndiceNoBackend = resposta.status === 400 && /indexado/i.test(erro.error || '');
     if (perdeuIndiceNoBackend) {
       indexadoNestaSessao = false;
@@ -99,12 +87,7 @@ export async function perguntarAoAgente(pergunta) {
   return resposta.json();
 }
 
-// Envia os dados de operação hospitalar ao sistema multiagente de previsão
-// de risco cardíaco e retorna { probabilidade, classificacao, protocolos,
-// recomendacao }. Pode levar vários segundos: a resposta passa por uma
-// cadeia de agentes (Orquestrador -> Analista de Risco -> Especialista em
-// Protocolos -> Planejador de Resposta), cada um com sua própria chamada ao
-// Gemini.
+/** Envia os dados de operação hospitalar ao sistema multiagente e retorna a avaliação de risco cardíaco. */
 export async function avaliarRiscoCardiaco(dadosOperacao, usuarioId) {
   const resposta = await fetch(`${API_URL}/api/risco/avaliar`, {
     method: 'POST',
@@ -120,10 +103,7 @@ export async function avaliarRiscoCardiaco(dadosOperacao, usuarioId) {
   return resposta.json();
 }
 
-// Busca a última leitura publicada pelo ESP32 via MQTT (fc_media,
-// pa_sistolica, spo2_media), guardada em memória pelo backend. Não dispara
-// nenhuma avaliação de risco — só lê o que já está guardado no backend. Se
-// o sensor nunca publicou nada ainda, volta { conectado: false, ... null }.
+/** Busca a última leitura do sensor IoT guardada em memória pelo backend. */
 export async function buscarLeituraIot() {
   const resposta = await fetch(`${API_URL}/api/risco/leitura-iot`);
 
@@ -135,10 +115,7 @@ export async function buscarLeituraIot() {
   return resposta.json();
 }
 
-// Conta de usuário (src/modules/auth do backend) — compartilhada com o
-// app web, por isso não fica no SQLite local (ver db/database.js:
-// definirSessao/obterUsuarioLogado, que só guardam a sessão lembrada
-// NESTE aparelho, não a conta em si).
+/** Cria uma nova conta de usuário no backend. */
 export async function cadastrar(email, senha) {
   const resposta = await fetch(`${API_URL}/api/auth/cadastro`, {
     method: 'POST',
@@ -154,6 +131,7 @@ export async function cadastrar(email, senha) {
   return resposta.json();
 }
 
+/** Autentica o usuário com e-mail e senha no backend. */
 export async function login(email, senha) {
   const resposta = await fetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
@@ -169,6 +147,7 @@ export async function login(email, senha) {
   return resposta.json();
 }
 
+/** Define o nickname do usuário no backend. */
 export async function definirNickname(usuarioId, nickname) {
   const resposta = await fetch(`${API_URL}/api/auth/nickname`, {
     method: 'POST',
@@ -184,8 +163,7 @@ export async function definirNickname(usuarioId, nickname) {
   return resposta.json();
 }
 
-// "Ficha de jogador": conta + avaliação de risco mais recente em destaque +
-// histórico curto (ver app/backend/src/modules/perfil).
+/** Busca o perfil do usuário, incluindo a avaliação de risco mais recente e o histórico. */
 export async function buscarPerfil(usuarioId) {
   const resposta = await fetch(`${API_URL}/api/perfil/${usuarioId}`);
 

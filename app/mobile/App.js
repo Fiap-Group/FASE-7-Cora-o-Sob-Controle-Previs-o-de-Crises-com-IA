@@ -17,7 +17,6 @@ import { initDatabase } from './src/db/database';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import AuthStack from './src/navigation/AuthStack';
 
-// Importar as telas
 import DashboardScreen from './src/screens/DashboardScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
@@ -26,6 +25,7 @@ import AnaliseStack from './src/navigation/AnaliseStack';
 import PrevisaoStack from './src/navigation/PrevisaoStack';
 const Tab = createBottomTabNavigator();
 
+/** Componente raiz: carrega fontes e banco local, e provê o contexto de autenticação. */
 export default function App() {
   const [fontsLoaded] = useFonts({
     Nunito_400Regular,
@@ -50,9 +50,7 @@ export default function App() {
   );
 }
 
-// A conta mora no backend (src/modules/auth) e é compartilhada com o app
-// web — sem sessão lembrada neste aparelho, só as telas de Login/Cadastro
-// aparecem; o resto do app (abas) só depois de autenticado.
+/** Decide entre exibir o fluxo de autenticação ou a navegação principal em abas. */
 function AppConteudo() {
   const { usuario, carregando } = useAuth();
 

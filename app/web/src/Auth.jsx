@@ -4,8 +4,11 @@ import { salvar } from './sessao';
 
 const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * Tela de login, cadastro e definição de nickname para acesso ao CardioIA.
+ */
 export default function Auth({ onAutenticado }) {
-  const [modo, setModo] = useState('login'); // 'login' | 'cadastro' | 'nickname'
+  const [modo, setModo] = useState('login');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [nickname, setNickname] = useState('');
@@ -15,6 +18,9 @@ export default function Auth({ onAutenticado }) {
 
   const emailValido = REGEX_EMAIL.test(email.trim());
 
+  /**
+   * Autentica o usuário com e-mail e senha e avança para o dashboard.
+   */
   const handleLogin = async (evento) => {
     evento.preventDefault();
     setErro('');
@@ -30,6 +36,9 @@ export default function Auth({ onAutenticado }) {
     }
   };
 
+  /**
+   * Valida o e-mail e cria a conta, avançando para a etapa de nickname.
+   */
   const handleCadastro = async (evento) => {
     evento.preventDefault();
     setErro('');
@@ -50,6 +59,9 @@ export default function Auth({ onAutenticado }) {
     }
   };
 
+  /**
+   * Salva o nickname escolhido e conclui o cadastro, autenticando o usuário.
+   */
   const handleNickname = async (evento) => {
     evento.preventDefault();
     setErro('');

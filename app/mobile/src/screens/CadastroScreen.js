@@ -6,6 +6,7 @@ import styles from '../styles/loginScreenStyles';
 
 const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** Tela de cadastro de novo usuário por e-mail e senha. */
 export default function CadastroScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -14,6 +15,7 @@ export default function CadastroScreen({ navigation }) {
   const emailValido = REGEX_EMAIL.test(email.trim());
   const podeEnviar = emailValido && senha.trim().length > 0 && !cadastrando;
 
+  /** Envia o cadastro e navega para a escolha de nickname. */
   const handleCadastrar = async () => {
     if (!podeEnviar) return;
 

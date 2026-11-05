@@ -1,9 +1,6 @@
 import { Alert, Platform } from 'react-native';
 
-// No react-native-web, Alert.alert() é um stub vazio: não mostra nada e
-// nunca chama os callbacks dos botões. Por isso usamos window.alert/confirm
-// quando rodando na web, e o Alert nativo nas outras plataformas.
-
+/** Exibe um alerta simples, usando window.alert na web e Alert nativo nas demais plataformas. */
 export function avisar(titulo, mensagem) {
   if (Platform.OS === 'web') {
     window.alert(mensagem ? `${titulo}\n\n${mensagem}` : titulo);
@@ -12,6 +9,7 @@ export function avisar(titulo, mensagem) {
   Alert.alert(titulo, mensagem);
 }
 
+/** Exibe uma confirmação com opções de cancelar ou confirmar, executando o callback informado. */
 export function confirmarAcao(titulo, mensagem, onConfirmar, textoConfirmar = 'Confirmar') {
   if (Platform.OS === 'web') {
     if (window.confirm(mensagem ? `${titulo}\n\n${mensagem}` : titulo)) {

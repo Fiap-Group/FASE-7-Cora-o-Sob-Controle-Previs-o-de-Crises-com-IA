@@ -1,18 +1,3 @@
-"""
-=============================================================================
-Controller do módulo RAG (equivalente a um @Controller do Nest)
-=============================================================================
-Expõe o pipeline RAG (shared/rag_system.py) como endpoints HTTP.
-
-Endpoints:
-    GET  /api/health    status, se há relatório indexado e modo do LLM
-    GET  /api/metrics   contadores e latências desde o último start
-    POST /api/index     indexa o perfil genômico (substitui o anterior)
-    POST /api/chat      { "question": "..." } -> resposta, fontes e flag grounded
-    POST /api/reset     apaga o índice do paciente da memória do backend
-=============================================================================
-"""
-
 import logging
 import os
 import time
@@ -34,11 +19,13 @@ router = APIRouter(prefix="/api", tags=["rag"])
 
 
 def erro_interno(contexto: str, excecao: Exception, status: int = 500) -> HTTPException:
+    """Loga o erro e devolve a exceção HTTP padronizada do módulo."""
     return _erro_interno_compartilhado(logger, contexto, excecao, status)
 
 
 @router.get("/health", response_model=HealthResponse)
 def health(estado: EstadoIndexacao = Depends(get_estado)) -> HealthResponse:
+    """Informa o status da API, se há um relatório indexado e qual LLM está em uso."""
     llm = os.getenv("LLM_BACKEND") or ("gemini" if os.getenv("GEMINI_API_KEY") else "não configurado")
     return HealthResponse(
         status="ok",
@@ -50,6 +37,7 @@ def health(estado: EstadoIndexacao = Depends(get_estado)) -> HealthResponse:
 
 @router.get("/metrics")
 def metrics() -> dict[str, Any]:
+    """Devolve os contadores e latências acumulados desde o último start."""
     return metricas.resumo()
 
 
@@ -101,7 +89,6 @@ def chat(
     if not response.grounded:
         metricas.incrementar("respostas_sem_ancoragem")
 
-    # Log sem o texto da pergunta: só hash, tamanho e metadados técnicos.
     logger.info(
         "Pergunta respondida",
         extra={

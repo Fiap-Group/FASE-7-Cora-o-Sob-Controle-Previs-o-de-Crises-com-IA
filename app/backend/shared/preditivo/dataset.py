@@ -1,21 +1,6 @@
-"""
-=============================================================================
-Base sintética — predição de pico de risco cardíaco (Fase 6)
-=============================================================================
-Gera a base de dados sintética usada para treinar o modelo preditivo de
-`pico_risco`. O código abaixo é o do enunciado da atividade, verbatim (só
-parametrizado por `n`/`seed` em vez de constantes fixas) — não inventamos
-nem simplificamos as 10 features nem a regra de `pico_risco`, pra manter o
-treino fiel ao que foi pedido.
-=============================================================================
-"""
-
 import numpy as np
 import pandas as pd
 
-# As 10 features usadas no treino, na ordem em que o modelo espera recebê-las.
-# Fonte única de verdade: `modelo.py`, `protocolos.py` e `agentes/schemas.py`
-# reaproveitam esta lista em vez de retypar os nomes das colunas.
 COLUNAS_FEATURES = [
     "idade_media",
     "carga_sistema",
@@ -33,13 +18,7 @@ COLUNA_ALVO = "pico_risco"
 
 
 def gerar_base_sintetica(n: int = 5000, seed: int = 42) -> pd.DataFrame:
-    """Gera `n` pacientes sintéticos com as 10 features e o alvo `pico_risco`.
-
-    Fórmula do enunciado: `pico_risco = 1` quando pelo menos 2 das 6 condições
-    de risco abaixo são verdadeiras (carga do sistema alta, espera longa,
-    SPO2 baixo, FC alta, muitos eventos nas últimas 24h, poucos recursos
-    disponíveis).
-    """
+    """Gera `n` pacientes sintéticos com as 10 features e o alvo `pico_risco`."""
     rng = np.random.RandomState(seed)
     df = pd.DataFrame({
         "idade_media": rng.normal(55, 12, n).clip(18, 90),

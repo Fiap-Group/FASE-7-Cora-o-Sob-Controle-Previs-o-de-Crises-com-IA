@@ -6,12 +6,14 @@ import { useAuth } from '../context/AuthContext';
 import { avisar } from '../utils/alerta';
 import styles from '../styles/loginScreenStyles';
 
+/** Tela de login de usuário por e-mail e senha. */
 export default function LoginScreen({ navigation }) {
   const { recarregarSessao } = useAuth();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [entrando, setEntrando] = useState(false);
 
+  /** Autentica o usuário e inicia a sessão. */
   const handleEntrar = async () => {
     if (!email.trim() || !senha.trim()) {
       avisar('Preencha e-mail e senha');

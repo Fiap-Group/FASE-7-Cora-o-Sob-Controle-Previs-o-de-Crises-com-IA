@@ -6,12 +6,14 @@ import { useAuth } from '../context/AuthContext';
 import { avisar } from '../utils/alerta';
 import styles from '../styles/loginScreenStyles';
 
+/** Tela de escolha do nickname ao final do cadastro. */
 export default function EscolherNicknameScreen({ route }) {
   const { usuarioId } = route.params;
   const { recarregarSessao } = useAuth();
   const [nickname, setNickname] = useState('');
   const [salvando, setSalvando] = useState(false);
 
+  /** Salva o nickname escolhido e inicia a sessão do usuário. */
   const handleConfirmar = async () => {
     if (!nickname.trim()) {
       avisar('Escolha um nickname');

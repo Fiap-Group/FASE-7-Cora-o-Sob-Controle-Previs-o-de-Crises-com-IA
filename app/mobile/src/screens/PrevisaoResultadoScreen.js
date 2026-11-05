@@ -8,6 +8,7 @@ const NIVEL_POR_CLASSIFICACAO = {
   'Baixo risco': 'baixo',
 };
 
+/** Tela que exibe o resultado da previsão de risco cardíaco e protocolos sugeridos. */
 export default function PrevisaoResultadoScreen({ route }) {
   const { resultado } = route.params;
   const { probabilidade, classificacao, protocolos, recomendacao } = resultado;

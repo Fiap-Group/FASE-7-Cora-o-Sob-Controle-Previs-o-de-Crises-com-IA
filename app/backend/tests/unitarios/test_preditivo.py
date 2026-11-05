@@ -1,11 +1,3 @@
-"""
-Testes do módulo preditivo (Fase 6, Parte 1): base sintética, modelo
-PyTorch e avaliação de protocolos. Nada aqui chama LLM nem precisa de chave
-de API — só pandas/numpy/torch/scikit-learn, local e rápido.
-
-Rodar com: pytest tests/unitarios/test_preditivo.py
-"""
-
 import sys
 from pathlib import Path
 from typing import cast
@@ -20,8 +12,6 @@ from shared.preditivo.dataset import COLUNA_ALVO, COLUNAS_FEATURES, gerar_base_s
 from shared.preditivo.modelo import prever_risco, treinar_modelo  # noqa: E402
 from shared.preditivo.protocolos import PROTOCOLOS, avaliar_protocolos  # noqa: E402
 
-# Paciente de exemplo do enunciado da Fase 6 (chave corrigida: o enunciado
-# tem um erro de digitação, "disponibilidade recursos" com espaço).
 NOVO_CASO = {
     "idade_media": 62,
     "carga_sistema": 92,
@@ -36,15 +26,15 @@ NOVO_CASO = {
 }
 
 
-# --- Base sintética ----------------------------------------------------------
-
 def test_gerar_base_sintetica_tem_5000_linhas_e_as_11_colunas_esperadas():
+    """Testa que a base sintética tem o número de linhas e as colunas esperadas."""
     df = gerar_base_sintetica(n=5000, seed=42)
     assert len(df) == 5000
     assert list(df.columns) == [*COLUNAS_FEATURES, COLUNA_ALVO]
 
 
 def test_pico_risco_nao_fica_todo_numa_classe_so():
+    """Testa que o alvo pico_risco não fica concentrado numa única classe."""
     df = gerar_base_sintetica(n=5000, seed=42)
     coluna_alvo = cast(pd.Series, df[COLUNA_ALVO])
     media = float(coluna_alvo.mean())
@@ -52,42 +42,29 @@ def test_pico_risco_nao_fica_todo_numa_classe_so():
 
 
 def test_gerar_base_sintetica_e_reprodutivel_com_a_mesma_seed():
+    """Testa que gerar a base com a mesma seed produz sempre o mesmo resultado."""
     df1 = gerar_base_sintetica(n=200, seed=7)
     df2 = gerar_base_sintetica(n=200, seed=7)
     assert df1.equals(df2)
 
 
-# --- Modelo -------------------------------------------------------------------
-
 def test_modelo_treinado_tem_acuracia_alta():
-    """pico_risco é função determinística das próprias features de treino
-    (ver dataset.py) — por isso a acurácia tende a ficar bem alta. Não é
-    vazamento de dados, é a natureza da base sintética do enunciado."""
+    """Testa que o modelo treinado atinge uma acurácia alta na base sintética."""
     df = gerar_base_sintetica(n=5000, seed=42)
     _, _, _, metricas = treinar_modelo(df, seed=42)
     assert metricas["acuracia"] > 0.90
 
 
 def test_prever_risco_contra_o_checkpoint_comitado():
-    """Usa shared/preditivo/modelo_risco.pt (gerado por
-    `python -m shared.preditivo.treinar`) — precisa existir no repo."""
+    """Testa a predição de risco usando o checkpoint do modelo já salvo no repositório."""
     probabilidade, classe = prever_risco(NOVO_CASO)
     assert 0.0 <= probabilidade <= 1.0
     assert classe in (0, 1)
-    # O paciente do enunciado bate em todas as 6 condições de risco da
-    # fórmula de treino — esperado classe 1 (alto risco).
     assert classe == 1
 
 
-# --- Protocolos -----------------------------------------------------------
-
 def test_avaliar_protocolos_para_o_novo_caso_do_enunciado():
-    """O enunciado ilustra 3 protocolos pra esse paciente, mas rodando os
-    limiares reais (spo2_media=89 não é <88; eventos_24h=5 não é >5) o
-    resultado correto é 4: carga do sistema, disponibilidade_recursos,
-    densidade_eventos e risco sistêmico alto. Tratamos o enunciado como
-    exemplo de formato, não como gabarito exato (ele mesmo diz "os valores
-    vão diferir")."""
+    """Testa os protocolos disparados para o paciente de exemplo do enunciado."""
     protocolos = avaliar_protocolos(NOVO_CASO, pico_risco_previsto=1)
     assert protocolos == [
         "Se carga do sistema > 85% → abrir unidades temporárias",
@@ -118,6 +95,7 @@ def _paciente_base() -> dict:
     ("pa_sistolica", 70, PROTOCOLOS[8]),
 ])
 def test_cada_condicao_numerica_dispara_seu_proprio_protocolo(campo, valor, protocolo_esperado):
+    """Testa que cada condição numérica dispara exatamente o seu próprio protocolo."""
     paciente = _paciente_base()
     paciente[campo] = valor
     protocolos = avaliar_protocolos(paciente, pico_risco_previsto=0)
@@ -125,10 +103,12 @@ def test_cada_condicao_numerica_dispara_seu_proprio_protocolo(campo, valor, prot
 
 
 def test_risco_sistemico_alto_depende_so_da_predicao_do_modelo():
-    paciente = _paciente_base()  # nenhum limiar numérico disparado
+    """Testa que o protocolo de risco sistêmico alto depende só da predição do modelo."""
+    paciente = _paciente_base()
     assert avaliar_protocolos(paciente, pico_risco_previsto=0) == []
     assert avaliar_protocolos(paciente, pico_risco_previsto=1) == [PROTOCOLOS[9]]
 
 
 def test_paciente_sem_nenhum_risco_nao_recebe_protocolo_nenhum():
+    """Testa que um paciente sem nenhum fator de risco não recebe protocolo nenhum."""
     assert avaliar_protocolos(_paciente_base(), pico_risco_previsto=0) == []

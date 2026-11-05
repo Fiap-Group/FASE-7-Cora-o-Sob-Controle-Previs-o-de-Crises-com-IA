@@ -8,10 +8,12 @@ import { buscarPerfilGenomicoAtual } from '../db/database';
 import { mapearRiscos } from '../utils/perfilGenomico';
 import styles from '../styles/riscosScreenStyles';
 
+/** Tela inicial que exibe os cards de risco derivados do relatório genômico do usuário. */
 export default function HomeScreen() {
    const [carregando, setCarregando] = useState(true);
    const [riscos, setRiscos] = useState([]);
 
+   /** Busca o perfil genômico atual e atualiza a lista de riscos exibida. */
    const carregarRiscos = useCallback(async () => {
       const perfil = await buscarPerfilGenomicoAtual();
       setRiscos(mapearRiscos(perfil));

@@ -113,11 +113,10 @@ curl -X POST http://localhost:5000/api/risco/avaliar \
   -d '{"idade_media":60,"carga_sistema":90,"tempo_espera":100,"fc_media":125,"spo2_media":85,"pa_sistolica":85,"temperatura":39,"densidade_eventos":7,"eventos_24h":6,"disponibilidade_recursos":20}'
 ```
 
-## Treinar o modelo / demo do multiagente
+## Treinar o modelo
 
 ```bash
 python -m shared.preditivo.treinar   # gera shared/preditivo/modelo_risco.pt
-python -m shared.agentes.demo        # precisa de GEMINI_API_KEY
 ```
 
 ## Testes e checagens

@@ -1,15 +1,3 @@
-"""
-=============================================================================
-Base de protocolos simulada — Fase 6
-=============================================================================
-Os 10 protocolos do enunciado, verbatim, e a lógica que decide quais deles
-se aplicam a um paciente. Diferente de uma entrega anterior (que tinha só
-duas listas genéricas por rótulo "Alto risco"/"Baixo risco"), aqui cada
-protocolo é avaliado contra a condição numérica real que o enunciado
-descreve.
-=============================================================================
-"""
-
 from typing import Any
 
 PROTOCOLOS = [
@@ -25,11 +13,6 @@ PROTOCOLOS = [
     "Se risco sistêmico alto → ativar estado de emergência",
 ]
 
-# Cada condição recebe o paciente (dict com as 10 features) e o
-# `pico_risco_previsto` (0/1) que o modelo já calculou. A condição 10
-# ("risco sistêmico alto") não tem um campo numérico próprio no enunciado —
-# decisão explícita: amarramos ela à própria predição do modelo, não a uma
-# nova fórmula reinventada por nós.
 _CONDICOES = [
     lambda p, _risco: p["spo2_media"] < 88,
     lambda p, _risco: p["carga_sistema"] > 85,
@@ -45,11 +28,7 @@ _CONDICOES = [
 
 
 def avaliar_protocolos(paciente: dict[str, Any], pico_risco_previsto: int) -> list[str]:
-    """Retorna os protocolos cuja condição real é verdadeira pro paciente.
-
-    `pico_risco_previsto` é a classe (0 ou 1) que o modelo preditivo já
-    calculou pra esse paciente — usada só na condição 10 (ver `_CONDICOES`).
-    """
+    """Devolve os protocolos cuja condição real é verdadeira para o paciente."""
     return [
         protocolo
         for protocolo, condicao in zip(PROTOCOLOS, _CONDICOES)

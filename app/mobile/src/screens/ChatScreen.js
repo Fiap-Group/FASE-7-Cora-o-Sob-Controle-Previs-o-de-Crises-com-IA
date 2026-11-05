@@ -2,6 +2,7 @@ import { View, Text } from 'react-native';
 import ChatBox from '../components/ChatBox';
 import styles from '../styles/chatScreenStyles';
 
+/** Tela de conversa com o agente, exibindo o contexto do resumo quando houver. */
 export default function ChatScreen({ route }) {
   const { sessaoId, resumoData } = route.params;
 

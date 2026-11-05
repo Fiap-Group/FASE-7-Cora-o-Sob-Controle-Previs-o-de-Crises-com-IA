@@ -1,13 +1,3 @@
-"""
-=============================================================================
-Helper de erro HTTP compartilhado entre os módulos (src/modules/*)
-=============================================================================
-Fica em `src/` (não em `shared/`) porque depende do FastAPI — `shared/`
-continua livre de dependência de framework web, usada também por scripts
-fora de um contexto HTTP (treinar.py, demo.py).
-=============================================================================
-"""
-
 import logging
 
 from fastapi import HTTPException

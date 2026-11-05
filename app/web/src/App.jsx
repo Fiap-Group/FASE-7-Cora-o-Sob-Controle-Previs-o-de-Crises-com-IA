@@ -3,12 +3,15 @@ import Auth from './Auth';
 import Dashboard from './Dashboard';
 import * as sessao from './sessao';
 
-// A conta mora no backend (src/modules/auth) e é compartilhada com o app
-// mobile — sem sessão lembrada neste navegador, só o fluxo de
-// Login/Cadastro aparece; o dashboard só depois de autenticado.
+/**
+ * Componente raiz: mostra a tela de autenticação ou o dashboard, conforme a sessão.
+ */
 export default function App() {
   const [usuario, setUsuario] = useState(() => sessao.obter());
 
+  /**
+   * Encerra a sessão do usuário atual.
+   */
   const handleSair = () => {
     sessao.limpar();
     setUsuario(null);

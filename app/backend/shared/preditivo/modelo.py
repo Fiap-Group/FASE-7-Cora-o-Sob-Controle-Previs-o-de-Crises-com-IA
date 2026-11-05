@@ -1,20 +1,3 @@
-"""
-=============================================================================
-Modelo preditivo de pico de risco cardíaco (Fase 6) — PyTorch
-=============================================================================
-Rede neural simples (MLP) treinada pra prever `pico_risco` a partir das 10
-features da base sintética (ver `dataset.py`). O scikit-learn aparece aqui
-só como utilitário (split estratificado, normalização, métricas) — quem
-aprende e prevê é a rede em `RedeRiscoCardiaco`.
-
-Nota sobre a acurácia: `pico_risco` é uma função determinística das próprias
-features de treino (ver `dataset.py`), então o modelo tende a acertar quase
-tudo — isso é esperado pela natureza da base sintética do enunciado, não é
-vazamento de dados nem sinal de que o modelo generalizaria assim tão bem
-numa base real.
-=============================================================================
-"""
-
 from pathlib import Path
 from typing import Any, cast
 
@@ -31,15 +14,10 @@ CAMINHO_MODELO = Path(__file__).resolve().parent / "modelo_risco.pt"
 
 
 class RedeRiscoCardiaco(nn.Module):
-    """MLP pequena: 10 features → 16 → 16 → 1 logit (sem sigmoid aqui —
-    aplicada na inferência, junto com `BCEWithLogitsLoss` no treino).
-
-    Tamanho escolhido empiricamente: redes maiores (32/64/128) convergiram
-    pior nessa base (ficam entre 85-91% de acurácia); com 16 neurônios por
-    camada + mais épocas, a rede aproxima melhor a regra de contagem de
-    limiares do enunciado (ver módulo `treinar.py`)."""
+    """Rede neural (MLP) que prevê o logit de pico de risco cardíaco a partir das 10 features."""
 
     def __init__(self, n_features: int = len(COLUNAS_FEATURES)):
+        """Monta as camadas da rede: entrada -> 16 -> 16 -> 1 logit."""
         super().__init__()
         self.camadas = nn.Sequential(
             nn.Linear(n_features, 16),
@@ -50,6 +28,7 @@ class RedeRiscoCardiaco(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Calcula o logit de pico de risco para o lote de entrada `x`."""
         return self.camadas(x)
 
 
@@ -65,9 +44,6 @@ def treinar_modelo(
     X = df[COLUNAS_FEATURES].to_numpy(dtype=np.float32)
     y = df[COLUNA_ALVO].to_numpy(dtype=np.float32)
 
-    # `cast`: o stub de train_test_split tipa o retorno de forma genérica
-    # demais pra esse unpacking de 4 valores (vira uma união com str/tuple
-    # que não reflete a realidade em runtime — sempre são os 4 ndarrays).
     divisao = cast(
         "tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]",
         train_test_split(X, y, test_size=0.2, random_state=seed, stratify=y),
@@ -75,8 +51,6 @@ def treinar_modelo(
     X_treino, X_teste, y_treino, y_teste = divisao
 
     scaler = StandardScaler().fit(X_treino)
-    # cast: mesmo motivo do train_test_split acima — o stub do scikit-learn
-    # tipa `transform`/`mean_`/`scale_` de forma genérica demais.
     X_treino_norm = cast(np.ndarray, scaler.transform(X_treino))
     X_teste_norm = cast(np.ndarray, scaler.transform(X_teste))
 
@@ -103,7 +77,7 @@ def treinar_modelo(
         logits_teste = modelo(tensor_X_teste).squeeze(1)
         probabilidades_teste = torch.sigmoid(logits_teste).numpy()
     previsoes_teste = (probabilidades_teste >= 0.5).astype(int)
-    y_teste_int = y_teste.astype(int)  # evita chaves "0.0"/"1.0" no relatório
+    y_teste_int = y_teste.astype(int)
 
     metricas = {
         "acuracia": accuracy_score(y_teste_int, previsoes_teste),
@@ -119,6 +93,7 @@ def salvar_modelo(
     scaler_scale: np.ndarray,
     caminho: Path = CAMINHO_MODELO,
 ) -> None:
+    """Salva os pesos do modelo e os parâmetros de normalização em disco."""
     torch.save(
         {
             "state_dict": modelo.state_dict(),
@@ -131,6 +106,7 @@ def salvar_modelo(
 
 
 def carregar_modelo(caminho: Path = CAMINHO_MODELO) -> dict[str, Any]:
+    """Carrega o modelo treinado e seus parâmetros de normalização a partir do checkpoint salvo."""
     if not caminho.exists():
         raise FileNotFoundError(
             f"Modelo não encontrado em {caminho}. Rode "

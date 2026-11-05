@@ -6,6 +6,7 @@ import { fonts } from '../theme/typography';
 
 const Stack = createNativeStackNavigator();
 
+/** Define a navegação em pilha das telas de resumos e conversa com o agente. */
 export default function AnaliseStack() {
   return (
     <Stack.Navigator
