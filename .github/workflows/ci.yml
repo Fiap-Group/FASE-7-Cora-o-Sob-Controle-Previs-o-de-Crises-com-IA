@@ -5,7 +5,8 @@ on:
   pull_request:
 
 jobs:
-  testes:
+  unit:
+    name: unit
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -28,10 +29,29 @@ jobs:
       - name: Testes unitários (modelo preditivo + wiring dos agentes)
         run: pytest tests/unitarios -q
 
+  integration:
+    name: integration
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app/backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: app/backend/requirements.txt
+
+      - name: Instalar dependências (torch CPU)
+        run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Instalar dependências do backend
+        run: pip install -r requirements.txt pytest pyright
+
       - name: Testes de integração (endpoints FastAPI, sem chamar o LLM de verdade)
         run: pytest tests/integracao -q
 
       - name: Checagem de tipos (pyright, sem erros)
-        run: |
-          pip install pyright
-          pyright
+        run: pyright
