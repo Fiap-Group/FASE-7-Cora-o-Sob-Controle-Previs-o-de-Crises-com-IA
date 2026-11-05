@@ -25,8 +25,11 @@ jobs:
       - name: Instalar dependências do backend
         run: pip install -r requirements.txt pytest
 
-      - name: Testes (unitários + integração, sem chamar o LLM de verdade)
-        run: pytest tests/ -q
+      - name: Testes unitários (modelo preditivo + wiring dos agentes)
+        run: pytest tests/unitarios -q
+
+      - name: Testes de integração (endpoints FastAPI, sem chamar o LLM de verdade)
+        run: pytest tests/integracao -q
 
       - name: Checagem de tipos (pyright, sem erros)
         run: |
