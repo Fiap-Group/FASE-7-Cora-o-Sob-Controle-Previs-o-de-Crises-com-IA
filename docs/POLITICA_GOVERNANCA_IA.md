@@ -1,4 +1,4 @@
-# Política de Governança de IA — Genera Intelligence (Dasa/Genera)
+# Política de Governança de IA — CardioIA
 
 Este documento define como a solução trata dados pessoais e de saúde, como
 registra eventos da operação e como sustenta a explicabilidade das respostas
@@ -55,7 +55,7 @@ pede autorização de novo.
 
 ## 4. Logging e rastreabilidade
 
-O backend registra eventos em JSON, um por linha (`app/backend/observabilidade.py`):
+O backend registra eventos em JSON, um por linha (`app/backend/shared/observabilidade.py`):
 
 | Evento | Campos registrados | Campos **não** registrados |
 |---|---|---|
@@ -82,7 +82,7 @@ A explicabilidade é tratada em três níveis:
    do contexto recuperado. É uma heurística de sobreposição de termos, não uma
    verificação factual. Respostas com `grounded: false` devem ser lidas com
    cautela, e a avaliação (`docs/AVALIACAO_MODELO.md`) reporta essa taxa.
-3. **Regras explícitas:** o prompt de sistema (`app/backend/prompts.py`) define
+3. **Regras explícitas:** o prompt de sistema (`app/backend/shared/prompts.py`) define
    o formato, o público-alvo e os limites do agente. Essas regras estão
    versionadas no repositório, o que permite auditar qualquer mudança de
    comportamento.

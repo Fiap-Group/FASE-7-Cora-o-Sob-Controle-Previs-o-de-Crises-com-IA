@@ -8,20 +8,27 @@ Rodar com:  pytest tests/
 
 import json
 import sys
+from collections.abc import Generator
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pytest
-from flask.testing import FlaskClient
+from fastapi.testclient import TestClient
 
 BACKEND = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND))
 
-from rag_system import Chunk, GenomicChunker, TextCleaner, VectorStore  # noqa: E402
-from prompts import DISCLAIMER_RESPOSTA, SYSTEM_PROMPT_RAG  # noqa: E402
-import api  # noqa: E402
-from observabilidade import FormatadorJSON, Metricas  # noqa: E402
+from shared.rag_system import Chunk, GenomicChunker, TextCleaner, VectorStore  # noqa: E402
+from shared.prompts import DISCLAIMER_RESPOSTA, SYSTEM_PROMPT_RAG  # noqa: E402
+from shared.observabilidade import FormatadorJSON, Metricas, hash_pergunta  # noqa: E402
+from src.main import app  # noqa: E402
+from src.modules.rag.dependencies import (  # noqa: E402
+    EstadoIndexacao,
+    get_estado,
+    get_pipeline,
+    get_pipeline_if_exists,
+)
 
 RELATORIO_EXEMPLO = BACKEND / "sample_sprint1_output.json"
 
@@ -70,7 +77,7 @@ class EmbeddingFalso:
 
 def test_index_patient_substitui_o_relatorio_anterior():
     """Regressão do bloqueador: indexar um 2º relatório não pode manter o 1º no índice."""
-    from rag_system import GenomicRAGPipeline
+    from shared.rag_system import GenomicRAGPipeline
 
     dados = json.loads(RELATORIO_EXEMPLO.read_text(encoding="utf-8"))
     segundo = json.loads(json.dumps(dados))
@@ -119,7 +126,7 @@ def test_log_nao_contem_texto_da_pergunta():
         msg="Pergunta respondida", args=(), exc_info=None,
     )
     registro.evento = "pergunta"
-    registro.pergunta_hash = api.hash_pergunta(pergunta_secreta)
+    registro.pergunta_hash = hash_pergunta(pergunta_secreta)
     registro.pergunta_chars = len(pergunta_secreta)
     linha = FormatadorJSON().format(registro)
     assert pergunta_secreta not in linha
@@ -155,31 +162,40 @@ class PipelineFalso:
 
 
 @pytest.fixture
-def cliente(monkeypatch: pytest.MonkeyPatch) -> FlaskClient:
-    monkeypatch.setattr(api, "_pipeline", PipelineFalso())
-    monkeypatch.setattr(api, "_patient_indexed", False)
-    api.app.config["TESTING"] = True
-    return api.app.test_client()
+def cliente() -> Generator[TestClient, None, None]:
+    """Substitui os providers do módulo RAG por doubles de teste via
+    `app.dependency_overrides` — o jeito idiomático do FastAPI de trocar
+    dependência em teste, equivalente a sobrescrever um provider num
+    módulo de teste do Nest. Troca o monkeypatch de globais do Flask."""
+    estado_teste = EstadoIndexacao()
+    pipeline_falso = PipelineFalso()
+    app.dependency_overrides[get_estado] = lambda: estado_teste
+    app.dependency_overrides[get_pipeline] = lambda: pipeline_falso
+    app.dependency_overrides[get_pipeline_if_exists] = lambda: pipeline_falso
+    try:
+        yield TestClient(app)
+    finally:
+        app.dependency_overrides.clear()
 
 
-def test_health_e_metrics_respondem(cliente: FlaskClient) -> None:
+def test_health_e_metrics_respondem(cliente: TestClient) -> None:
     assert cliente.get("/api/health").status_code == 200
     resposta = cliente.get("/api/metrics")
     assert resposta.status_code == 200
-    assert "contadores" in resposta.get_json()
+    assert "contadores" in resposta.json()
 
 
-def test_chat_sem_indexacao_retorna_400_com_mensagem_reconhecida_pelo_front(cliente: FlaskClient) -> None:
+def test_chat_sem_indexacao_retorna_400_com_mensagem_reconhecida_pelo_front(cliente: TestClient) -> None:
     resposta = cliente.post("/api/chat", json={"question": "oi"})
     assert resposta.status_code == 400
-    assert "indexado" in resposta.get_json()["error"]
+    assert "indexado" in resposta.json()["error"]
 
 
-def test_index_depois_chat_e_reset(cliente: FlaskClient) -> None:
+def test_index_depois_chat_e_reset(cliente: TestClient) -> None:
     assert cliente.post("/api/index", json={"paciente": {}}).status_code == 200
     resposta = cliente.post("/api/chat", json={"question": "qual meu risco?"})
     assert resposta.status_code == 200
-    corpo = resposta.get_json()
+    corpo = resposta.json()
     assert "answer" in corpo and "sources" in corpo and "grounded" in corpo
     assert DISCLAIMER_RESPOSTA.strip() in corpo["answer"]
 
@@ -187,16 +203,18 @@ def test_index_depois_chat_e_reset(cliente: FlaskClient) -> None:
     assert cliente.post("/api/chat", json={"question": "oi"}).status_code == 400
 
 
-def test_erro_interno_nao_vaza_detalhe_ao_cliente(cliente: FlaskClient, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_erro_interno_nao_vaza_detalhe_ao_cliente(cliente: TestClient) -> None:
     class PipelineQuebrado(PipelineFalso):
         def answer(self, pergunta: str) -> Any:
             raise RuntimeError("segredo interno: chave xyz")
 
-    monkeypatch.setattr(api, "_pipeline", PipelineQuebrado())
-    monkeypatch.setattr(api, "_patient_indexed", True)
+    app.dependency_overrides[get_pipeline] = lambda: PipelineQuebrado()
+    estado = app.dependency_overrides[get_estado]()
+    estado.indexado = True
+
     resposta = cliente.post("/api/chat", json={"question": "oi"})
     assert resposta.status_code == 500
-    assert "segredo interno" not in resposta.get_data(as_text=True)
+    assert "segredo interno" not in resposta.text
 
 
 # --- Métricas -----------------------------------------------------------------

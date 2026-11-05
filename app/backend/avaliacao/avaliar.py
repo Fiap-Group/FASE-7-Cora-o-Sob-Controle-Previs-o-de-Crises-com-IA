@@ -35,7 +35,7 @@ from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv(BACKEND / ".env")
 
-from rag_system import GenomicRAGPipeline  # noqa: E402
+from shared.rag_system import GenomicRAGPipeline  # noqa: E402
 from validacao import avaliar_resposta  # noqa: E402
 
 GABARITO = BACKEND / "avaliacao" / "gabarito.json"

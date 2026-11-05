@@ -1,6 +1,6 @@
 """
 =============================================================================
-Sistema RAG Genômico - Challenge Dasa/Genera | Sprint 2
+Sistema RAG Genômico - CardioIA (reaproveitado de fase anterior)
 =============================================================================
 Engrenagem de Inteligência: Recuperação e Geração de Respostas Contextualizadas
 a partir de dados genômicos estruturados.
@@ -26,7 +26,7 @@ from typing import Any, cast
 
 import numpy as np
 
-from prompts import DISCLAIMER_RESPOSTA, SYSTEM_PROMPT_RAG
+from shared.prompts import DISCLAIMER_RESPOSTA, SYSTEM_PROMPT_RAG
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -935,7 +935,7 @@ class LLMGenerator:
 
 class GenomicRAGPipeline:
     """
-    Pipeline RAG completo para o sistema genômico Dasa/Genera.
+    Pipeline RAG completo para o sistema genômico do CardioIA.
 
     Orquestra todos os componentes:
     TextCleaner → GenomicChunker → EmbeddingEngine →

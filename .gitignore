@@ -8,6 +8,8 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
+.vscode/
+.github/
 
 # Native
 .kotlin/
@@ -44,7 +46,7 @@ yarn-error.*
 app/backend/__pycache__/
 app/backend/.venv/
 app/backend/.env
-app/backend/logs/
+app/backend/shared/logs/
 app/backend/.pytest_cache/
 app/dist/
 

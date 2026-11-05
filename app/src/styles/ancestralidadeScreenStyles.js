@@ -193,4 +193,17 @@ export default StyleSheet.create({
   botaoDesabilitado: {
     opacity: 0.5,
   },
+
+  avisoEnviando: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 16,
+  },
+  avisoEnviandoTexto: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: fonts.regular,
+    color: colors.textSecondary,
+  },
 });

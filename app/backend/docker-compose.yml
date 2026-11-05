@@ -10,5 +10,15 @@ services:
       HOST: 0.0.0.0
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8081}
     volumes:
-      - ./logs:/app/logs
+      # Volume nomeado, não bind mount: o caminho absoluto desta pasta tem
+      # ":" no nome ("FASE 7: Coração..."), e o Docker usa ":" como
+      # separador origem/destino/modo em QUALQUER bind mount — não tem
+      # sintaxe de compose que escape isso, porque o daemon recebe a
+      # string final já montada. Um volume nomeado não embute o caminho do
+      # host, então não tem esse problema. Ver os logs com
+      # `docker compose logs -f` ou `docker compose exec backend cat logs/app.log`.
+      - backend_logs:/app/logs
     restart: unless-stopped
+
+volumes:
+  backend_logs:
