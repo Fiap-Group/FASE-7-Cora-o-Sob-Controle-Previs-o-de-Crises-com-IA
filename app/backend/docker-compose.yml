@@ -1,6 +1,26 @@
 services:
+  db:
+    image: postgres:16-alpine
+    env_file:
+      - .env
+    # Só localhost, mesmo padrão do backend — dá pra rodar o backend
+    # direto da venv (fora do container) apontando pra esse Postgres.
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cardioia}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   backend:
     build: .
+    depends_on:
+      db:
+        condition: service_healthy
     # Porta publicada só na interface local. O túnel (cloudflared/ngrok) acessa daqui.
     ports:
       - "127.0.0.1:5000:5000"
@@ -9,16 +29,16 @@ services:
     environment:
       HOST: 0.0.0.0
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8081}
+      # Dentro do compose o Postgres é "db", não "localhost" (que é o
+      # valor do .env pra rodar o backend fora do container).
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-cardioia}:${POSTGRES_PASSWORD:-cardioia}@db:5432/${POSTGRES_DB:-cardioia}
     volumes:
-      # Volume nomeado, não bind mount: o caminho absoluto desta pasta tem
-      # ":" no nome ("FASE 7: Coração..."), e o Docker usa ":" como
-      # separador origem/destino/modo em QUALQUER bind mount — não tem
-      # sintaxe de compose que escape isso, porque o daemon recebe a
-      # string final já montada. Um volume nomeado não embute o caminho do
-      # host, então não tem esse problema. Ver os logs com
-      # `docker compose logs -f` ou `docker compose exec backend cat logs/app.log`.
+      # Volume nomeado, não bind mount — não embute o caminho do host. Ver
+      # os logs com `docker compose logs -f` ou
+      # `docker compose exec backend cat logs/app.log`.
       - backend_logs:/app/logs
     restart: unless-stopped
 
 volumes:
   backend_logs:
+  postgres_data:

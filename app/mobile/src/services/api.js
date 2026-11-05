@@ -134,3 +134,52 @@ export async function buscarLeituraIot() {
 
   return resposta.json();
 }
+
+// Conta de usuário (src/modules/auth do backend) — compartilhada com o
+// app web, por isso não fica no SQLite local (ver db/database.js:
+// definirSessao/obterUsuarioLogado, que só guardam a sessão lembrada
+// NESTE aparelho, não a conta em si).
+export async function cadastrar(email, senha) {
+  const resposta = await fetch(`${API_URL}/api/auth/cadastro`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, senha }),
+  });
+
+  if (!resposta.ok) {
+    const erro = await resposta.json().catch(() => ({}));
+    throw new Error(mensagemDeErro(erro, 'Falha ao criar a conta.'));
+  }
+
+  return resposta.json();
+}
+
+export async function login(email, senha) {
+  const resposta = await fetch(`${API_URL}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, senha }),
+  });
+
+  if (!resposta.ok) {
+    const erro = await resposta.json().catch(() => ({}));
+    throw new Error(mensagemDeErro(erro, 'Falha ao entrar na conta.'));
+  }
+
+  return resposta.json();
+}
+
+export async function definirNickname(usuarioId, nickname) {
+  const resposta = await fetch(`${API_URL}/api/auth/nickname`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ usuario_id: usuarioId, nickname }),
+  });
+
+  if (!resposta.ok) {
+    const erro = await resposta.json().catch(() => ({}));
+    throw new Error(mensagemDeErro(erro, 'Falha ao salvar o nickname.'));
+  }
+
+  return resposta.json();
+}

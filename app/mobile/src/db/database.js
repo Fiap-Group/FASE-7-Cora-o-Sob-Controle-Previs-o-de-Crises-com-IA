@@ -58,7 +58,37 @@ export async function initDatabase() {
       protocolos_json TEXT NOT NULL,
       recomendacao TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS sessao_atual (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      usuario_id INTEGER,
+      email TEXT,
+      nickname TEXT
+    );
   `);
+}
+
+// A conta em si mora no backend (POST /api/auth/*, compartilhada com o
+// web) — isto aqui só lembra quem está logado NESTE aparelho, pra não
+// pedir login de novo a cada vez que o app abre.
+export async function definirSessao(usuario) {
+  const db = await getDatabase();
+  await db.runAsync(
+    `INSERT INTO sessao_atual (id, usuario_id, email, nickname) VALUES (1, ?, ?, ?)
+     ON CONFLICT (id) DO UPDATE SET usuario_id = excluded.usuario_id, email = excluded.email, nickname = excluded.nickname`,
+    [usuario.id, usuario.email, usuario.nickname]
+  );
+}
+
+export async function encerrarSessao() {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM sessao_atual WHERE id = 1');
+}
+
+export async function obterUsuarioLogado() {
+  const db = await getDatabase();
+  const linha = await db.getFirstAsync('SELECT usuario_id, email, nickname FROM sessao_atual WHERE id = 1');
+  return linha ? { id: linha.usuario_id, email: linha.email, nickname: linha.nickname } : null;
 }
 
 // Consentimento LGPD: registro de que a pessoa autorizou o uso dos dados

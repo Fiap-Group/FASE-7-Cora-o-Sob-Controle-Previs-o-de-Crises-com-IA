@@ -40,6 +40,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from shared.db import Base, engine
+
+from src.modules.auth.router import router as auth_router
 from src.modules.rag.router import router as rag_router
 from src.modules.risco.mqtt_listener import iniciar_mqtt_listener
 from src.modules.risco.router import router as risco_router
@@ -47,10 +50,14 @@ from src.modules.risco.router import router as risco_router
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    """Sobe o listener MQTT (src/modules/risco/mqtt_listener.py) junto do
-    boot do servidor. Conecta em background (client.loop_start()); se o
-    broker não estiver disponível agora, não impede o resto da API de
-    subir — ver docstring de iniciar_mqtt_listener."""
+    """Sobe o listener MQTT (src/modules/risco/mqtt_listener.py) e garante
+    a tabela de usuários (src/modules/auth) no Postgres, junto do boot do
+    servidor. `create_all` não recria nada se a tabela já existir — mesmo
+    espírito do "CREATE TABLE IF NOT EXISTS" do database.js do mobile.
+    Conecta em background (client.loop_start()); se o broker MQTT não
+    estiver disponível agora, não impede o resto da API de subir — ver
+    docstring de iniciar_mqtt_listener."""
+    Base.metadata.create_all(engine)
     iniciar_mqtt_listener()
     yield
 
@@ -59,7 +66,9 @@ app = FastAPI(title="CardioIA", lifespan=lifespan)
 
 origens_permitidas = [
     origem.strip()
-    for origem in os.getenv("CORS_ORIGINS", "http://localhost:8081,http://localhost:19006").split(",")
+    for origem in os.getenv(
+        "CORS_ORIGINS", "http://localhost:8081,http://localhost:19006,http://localhost:5173"
+    ).split(",")
     if origem.strip()
 ]
 app.add_middleware(
@@ -79,6 +88,7 @@ async def tratar_http_exception(_request, exc: HTTPException) -> JSONResponse:
 
 # Cada módulo novo entra aqui como um app.include_router(...) a mais —
 # igual um import de módulo no AppModule do Nest.
+app.include_router(auth_router)
 app.include_router(rag_router)
 app.include_router(risco_router)
 

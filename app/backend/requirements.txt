@@ -26,3 +26,7 @@ openai-agents==0.22.2            # pin exato — superfície de API já validada
 
 # ── IoT (src/modules/risco/mqtt_listener.py) ────────────────────────────
 paho-mqtt>=2.1.0                 # assina o tópico MQTT publicado pelo ESP32
+
+# ── Auth (src/modules/auth, shared/db.py) ───────────────────────────────
+sqlalchemy>=2.0.0                # ORM — conta de usuário (Postgres em prod, SQLite em teste)
+psycopg2-binary>=2.9.0           # driver Postgres (wheel pré-compilado, sem libpq-dev)

@@ -52,9 +52,14 @@ docs/
 
 .github/workflows/ci.yml          # CI: testes + checagem de tipos a cada push
 
-app/                              # App React Native/Expo (front web)
-  src/                            # screens, components, db (SQLite), services
-  netlify.toml                    # Configuração do deploy estático
+app/
+  mobile/                         # App React Native/Expo
+    src/                          # screens, components, db (SQLite), services
+    app.json, eas.json            # Config do build .apk (EAS Build)
+
+  web/                            # App React+Vite (dashboard web)
+    src/                          # App.jsx, api.js
+    vercel.json                   # Rotas SPA (deploy na Vercel)
 
   backend/                        # Backend (FastAPI)
     src/
@@ -108,10 +113,15 @@ cp .env.example .env                  # preencha GEMINI_API_KEY
 docker compose up -d --build
 curl http://localhost:5000/api/health # {"status": "ok", ...}
 
-# 2. Front local (opcional — testa contra o backend da sua máquina)
-cd ..
+# 2. Front mobile local (opcional — testa contra o backend da sua máquina)
+cd ../mobile
 npm install
 npx expo start --web                  # abre em http://localhost:8081
+
+# 3. Front web local (opcional)
+cd ../web
+npm install
+npm run dev                           # abre em http://localhost:5173
 ```
 
 - Testes e checagem de tipos (sem chamar o Gemini): `bash app/backend/scripts/ci_local.sh`.
