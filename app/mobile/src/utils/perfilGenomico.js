@@ -1,20 +1,16 @@
-// Deriva os dados exibidos em Ancestralidade/Riscos/Dashboard a partir do
-// relatório genômico salvo pelo usuário (ver src/db/database.js).
-
+/** Mapeia a composição de ancestralidade do perfil para o formato usado na tela. */
 export function mapearAncestralidade(perfil) {
   const composicao = perfil?.ancestralidade?.composicao ?? [];
   return composicao.map((item) => ({ regiao: item.origem, percentual: item.percentual }));
 }
 
+/** Retorna as principais regiões de ancestralidade ordenadas pelo percentual. */
 export function topAncestralidade(perfil, quantidade = 2) {
   return [...mapearAncestralidade(perfil)]
     .sort((a, b) => b.percentual - a.percentual)
     .slice(0, quantidade);
 }
 
-// Ordem importa: termos compostos (ex: "baixo-moderado") precisam vir antes
-// dos termos simples que eles contêm ("baixo", "moderado"), senão o
-// .includes() casa com a regra errada.
 const REGRAS_NIVEL = [
   { termo: 'muito alto', nivel: 'muito alto', severidade: 4 },
   { termo: 'muito elevado', nivel: 'muito alto', severidade: 4 },
@@ -27,6 +23,7 @@ const REGRAS_NIVEL = [
   { termo: 'baixo', nivel: 'baixo', severidade: 1 },
 ];
 
+/** Classifica o texto de nível de risco em um nível e severidade padronizados. */
 export function mapearNivelRisco(nivelRiscoRaw) {
   const normalizado = String(nivelRiscoRaw || '')
     .toLowerCase()
@@ -37,6 +34,7 @@ export function mapearNivelRisco(nivelRiscoRaw) {
   return regra ? { nivel: regra.nivel, severidade: regra.severidade } : { nivel: 'moderado', severidade: 2 };
 }
 
+/** Mapeia os riscos de doenças do perfil para o formato usado nos cartões de risco. */
 export function mapearRiscos(perfil) {
   const riscos = perfil?.riscos_doencas ?? [];
   return riscos.map((item, index) => {
@@ -51,6 +49,7 @@ export function mapearRiscos(perfil) {
   });
 }
 
+/** Retorna o risco mapeado com a maior severidade. */
 export function riscoDeMaiorSeveridade(riscosMapeados) {
   if (!riscosMapeados.length) return null;
   return [...riscosMapeados].sort((a, b) => b.severidade - a.severidade)[0];

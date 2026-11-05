@@ -1,21 +1,9 @@
-"""
-=============================================================================
-Script de treino do modelo preditivo (Fase 6)
-=============================================================================
-Gera a base sintética, treina a rede, imprime as métricas de avaliação
-(acurácia, matriz de confusão, relatório de classificação) e salva o
-checkpoint em `modelo_risco.pt`.
-
-Rodar de dentro de app/backend:
-    python -m shared.preditivo.treinar
-=============================================================================
-"""
-
 from shared.preditivo.dataset import gerar_base_sintetica
 from shared.preditivo.modelo import salvar_modelo, treinar_modelo
 
 
 def main() -> None:
+    """Gera a base sintética, treina o modelo, imprime as métricas e salva o checkpoint."""
     print("Gerando base sintética (5000 pacientes)...")
     df = gerar_base_sintetica(n=5000, seed=42)
     print(f"Distribuição de pico_risco:\n{df['pico_risco'].value_counts()}\n")

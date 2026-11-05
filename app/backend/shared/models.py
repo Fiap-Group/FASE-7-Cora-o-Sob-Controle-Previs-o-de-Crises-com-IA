@@ -1,7 +1,3 @@
-"""Modelos SQLAlchemy — dado de domínio persistente, por isso fica em
-`shared/` (mesmo motivo de `shared/agentes/schemas.py`), não dentro de
-`src/modules/auth/`, que só tem o shape HTTP."""
-
 from datetime import datetime
 from typing import Any
 
@@ -12,6 +8,8 @@ from .db import Base
 
 
 class Usuario(Base):
+    """Conta de usuário persistida no banco."""
+
     __tablename__ = "usuarios"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -22,11 +20,7 @@ class Usuario(Base):
 
 
 class HistoricoRisco(Base):
-    """Uma linha por avaliação de risco concluída (src/modules/risco) feita
-    por um usuário logado — fonte de dados do "Perfil" gamificado
-    (src/modules/perfil). Mesmo shape do que o SQLite do mobile já guarda
-    em `avaliacoes_risco` (app/mobile/src/db/database.js), só que
-    centralizado e com `usuario_id`."""
+    """Uma avaliação de risco concluída por um usuário, usada como fonte do perfil gamificado."""
 
     __tablename__ = "historico_risco"
 

@@ -1,14 +1,3 @@
-"""
-=============================================================================
-Glossário de termos técnicos — traduções para o paciente leigo
-=============================================================================
-Termos que aparecem nos relatórios genéticos e a explicação em linguagem
-simples que o agente deve usar. Injetado no prompt do sistema (ver
-prompts.py), para que o modelo use estas traduções prontas em vez de
-inventar uma explicação diferente a cada resposta.
-=============================================================================
-"""
-
 GLOSSARIO = {
     "gene": "trecho do DNA que funciona como uma receita para o corpo produzir alguma substância",
     "DNA": "o 'manual de instruções' do corpo, guardado em cada célula",
@@ -29,5 +18,6 @@ GLOSSARIO = {
 
 
 def glossario_para_prompt() -> str:
+    """Formata o glossário como lista de linhas para injetar no prompt do sistema."""
     linhas = [f'- "{termo}": {explicacao}' for termo, explicacao in GLOSSARIO.items()]
     return "\n".join(linhas)

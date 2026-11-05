@@ -1,18 +1,3 @@
-"""
-=============================================================================
-Providers do módulo RAG (equivalente aos providers do @Module do Nest)
-=============================================================================
-`get_pipeline` é injetado nas rotas via `Depends(get_pipeline)` — o
-equivalente do FastAPI pra injeção de dependência no construtor de um
-@Injectable(). Cria o pipeline uma única vez (lazy singleton); os testes
-substituem essa dependência por um double via `app.dependency_overrides`,
-em vez de monkeypatch num módulo global.
-
-`EstadoIndexacao` substitui o antigo `_patient_indexed` (bool global do
-Flask) por uma instância isolada — também injetável/substituível nos testes.
-=============================================================================
-"""
-
 import os
 import threading
 from typing import Any
@@ -47,13 +32,15 @@ def get_pipeline() -> GenomicRAGPipeline:
 
 
 def get_pipeline_if_exists() -> GenomicRAGPipeline | None:
-    """Usado pelo /reset: não força a criação (cara, carrega o modelo de
-    embeddings) só pra apagar um índice que talvez nunca tenha existido."""
+    """Devolve o pipeline já criado, sem forçar sua criação."""
     return _pipeline
 
 
 class EstadoIndexacao:
+    """Guarda se já há um perfil genômico indexado na memória do backend."""
+
     def __init__(self) -> None:
+        """Inicializa o estado como não indexado."""
         self.indexado = False
 
 
@@ -61,4 +48,5 @@ _estado = EstadoIndexacao()
 
 
 def get_estado() -> EstadoIndexacao:
+    """Devolve a instância compartilhada do estado de indexação."""
     return _estado

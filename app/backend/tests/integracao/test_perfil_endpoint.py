@@ -1,11 +1,3 @@
-"""
-Testes do endpoint do módulo perfil: GET /api/perfil/{usuario_id}.
-
-Mesmo princípio de "sem depender de serviço externo" dos outros testes
-(test_auth_endpoint.py, test_risco_endpoint.py) — SQLite em memória no
-lugar do Postgres real, via app.dependency_overrides[get_db].
-"""
-
 import sys
 from collections.abc import Generator
 from pathlib import Path
@@ -57,9 +49,11 @@ PACIENTE_EXEMPLO = {
 
 @pytest.fixture
 def cliente() -> Generator[TestClient, None, None]:
+    """Cria um cliente de teste com um SQLite em memória e um avaliador de risco fake."""
     Base.metadata.create_all(_engine_teste)
 
     def _get_db_teste() -> Generator:
+        """Fornece uma sessão do banco de teste."""
         db = _SessionTeste()
         try:
             yield db
@@ -76,10 +70,12 @@ def cliente() -> Generator[TestClient, None, None]:
 
 
 def _criar_usuario(cliente: TestClient) -> int:
+    """Cadastra um usuário de exemplo e devolve seu id."""
     return cliente.post("/api/auth/cadastro", json=USUARIO_EXEMPLO).json()["id"]
 
 
 def test_perfil_de_usuario_sem_avaliacoes(cliente: TestClient):
+    """Testa o perfil de um usuário que ainda não tem nenhuma avaliação."""
     usuario_id = _criar_usuario(cliente)
 
     resposta = cliente.get(f"/api/perfil/{usuario_id}")
@@ -92,6 +88,7 @@ def test_perfil_de_usuario_sem_avaliacoes(cliente: TestClient):
 
 
 def test_perfil_com_avaliacoes_devolve_a_mais_recente_em_destaque(cliente: TestClient):
+    """Testa que o perfil destaca a avaliação mais recente do usuário."""
     usuario_id = _criar_usuario(cliente)
 
     cliente.post("/api/risco/avaliar", json={**PACIENTE_EXEMPLO, "usuario_id": usuario_id})
@@ -109,6 +106,7 @@ def test_perfil_com_avaliacoes_devolve_a_mais_recente_em_destaque(cliente: TestC
 
 
 def test_perfil_de_usuario_inexistente_retorna_404(cliente: TestClient):
+    """Testa que buscar o perfil de um usuário inexistente devolve 404."""
     resposta = cliente.get("/api/perfil/99999")
 
     assert resposta.status_code == 404

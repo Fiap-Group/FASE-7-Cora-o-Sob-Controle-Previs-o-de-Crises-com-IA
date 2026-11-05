@@ -5,7 +5,6 @@ import { buscarMensagens, salvarMensagem } from '../db/database';
 import { perguntarAoAgente } from '../services/api';
 import styles from '../styles/chatBoxStyles';
 
-// Nomes amigáveis das seções do relatório, para a explicação de fontes.
 const NOMES_SECAO = {
   perfil: 'Seu perfil',
   ancestralidade: 'Sua ancestralidade',
@@ -14,13 +13,13 @@ const NOMES_SECAO = {
   recomendacoes: 'Recomendações',
 };
 
+/** Caixa de chat que exibe o histórico de mensagens e permite conversar com o agente de IA. */
 export default function ChatBox({ sessaoId }) {
   const [mensagens, setMensagens] = useState([]);
   const [texto, setTexto] = useState('');
   const [fontesAbertas, setFontesAbertas] = useState({});
   const listaRef = useRef(null);
 
-  // Carrega o histórico da sessão recebida (a primeira mensagem já é o resumo, salvo pelo criarResumo)
   useEffect(() => {
     if (!sessaoId) return;
 
@@ -30,6 +29,7 @@ export default function ChatBox({ sessaoId }) {
     })();
   }, [sessaoId]);
 
+  /** Envia a mensagem digitada ao agente e atualiza o histórico com a resposta. */
   const handleEnviar = async () => {
     const mensagemDigitada = texto.trim();
     if (!mensagemDigitada || !sessaoId) return;
@@ -41,7 +41,6 @@ export default function ChatBox({ sessaoId }) {
 
     try {
       const resultado = await perguntarAoAgente(mensagemDigitada);
-      // As fontes ficam só na memória da sessão atual (explicabilidade); não são gravadas no SQLite.
       const respostaIA = {
         id: (Date.now() + 1).toString(),
         autor: 'ia',
@@ -51,8 +50,6 @@ export default function ChatBox({ sessaoId }) {
       setMensagens((atual) => [...atual, respostaIA]);
       await salvarMensagem(sessaoId, 'ia', resultado.answer);
     } catch (erro) {
-      // Orientação do próprio app (ex.: "envie um relatório primeiro") é mostrada direto,
-      // sem o preâmbulo de "backend fora do ar", que só vale para falha de conexão.
       const semRelatorio = erro.message?.startsWith('Nenhum relatório enviado');
       const textoErro = semRelatorio
         ? erro.message

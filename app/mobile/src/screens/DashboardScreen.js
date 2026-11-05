@@ -9,11 +9,13 @@ import { mapearRiscos, riscoDeMaiorSeveridade, topAncestralidade } from '../util
 import { useAuth } from '../context/AuthContext';
 import styles from '../styles/dashboardScreenStyles';
 
+/** Tela inicial do app, com destaques de risco, ancestralidade e resumos recentes. */
 export default function DashboardScreen({ navigation }) {
   const { usuario, sair } = useAuth();
   const [riscoDestaque, setRiscoDestaque] = useState(null);
   const [ancestralidadeDestaque, setAncestralidadeDestaque] = useState([]);
 
+  /** Busca o perfil genômico e atualiza os destaques de risco e ancestralidade. */
   const carregarDestaques = useCallback(async () => {
     const perfil = await buscarPerfilGenomicoAtual();
     setRiscoDestaque(riscoDeMaiorSeveridade(mapearRiscos(perfil)));

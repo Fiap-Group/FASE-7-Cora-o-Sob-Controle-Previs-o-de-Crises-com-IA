@@ -1,15 +1,3 @@
-"""
-Monitor cardíaco simulado (ESP32 + MicroPython, Wokwi)
-
-Lê 3 potenciômetros (frequência cardíaca, pressão sistólica, saturação de
-oxigênio), publica uma leitura em JSON via MQTT (HiveMQ Cloud, TLS) a cada
-2s e pisca o LED de status quando alguma métrica sai da faixa seguir.
-
-As credenciais do MQTT ficam em secrets.py (gitignorado, ver
-secrets.example.py). Precisa da lib umqtt.simple — Wokwi resolve isso
-automaticamente ao importar.
-"""
-
 import json
 import time
 
@@ -39,6 +27,7 @@ adc_spo2 = ADC(Pin(PIN_SPO2))
 
 
 def conectar_wifi():
+    """Conecta o ESP32 à rede WiFi, piscando o LED até a conexão ser estabelecida."""
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     if not wlan.isconnected():
@@ -52,22 +41,27 @@ def conectar_wifi():
 
 
 def mapear(valor, min_in, max_in, min_out, max_out):
+    """Converte um valor de uma faixa de entrada para a faixa de saída correspondente."""
     return min_out + (valor - min_in) * (max_out - min_out) / (max_in - min_in)
 
 
 def ler_fc_media():
+    """Lê o potenciômetro de frequência cardíaca e converte para batimentos por minuto."""
     return round(mapear(adc_fc.read_u16(), 0, 65535, 40, 180), 1)
 
 
 def ler_pa_sistolica():
+    """Lê o potenciômetro de pressão arterial e converte para a pressão sistólica em mmHg."""
     return round(mapear(adc_pa.read_u16(), 0, 65535, 70, 220), 1)
 
 
 def ler_spo2_media():
+    """Lê o potenciômetro de saturação de oxigênio e converte para a porcentagem de SpO2."""
     return round(mapear(adc_spo2.read_u16(), 0, 65535, 70, 100), 1)
 
 
 def conectar_mqtt():
+    """Cria o cliente MQTT, conecta ao broker HiveMQ Cloud via TLS e o retorna."""
     client = MQTTClient(
         "esp32-cardio-monitor",
         MQTT_SERVER,
@@ -83,6 +77,7 @@ def conectar_mqtt():
 
 
 def main():
+    """Conecta o ESP32 ao WiFi e ao broker MQTT e publica as leituras vitais em loop."""
     conectar_wifi()
     client = conectar_mqtt()
     print("Monitor cardíaco iniciado — publicando em", TOPIC_DATA)

@@ -1,21 +1,5 @@
-"""
-=============================================================================
-Configuração de Prompts — Agente RAG CardioIA
-=============================================================================
-Prompts usados pelo pipeline RAG (rag_system.py). Mantidos num arquivo
-separado da lógica do pipeline para que o tom e o formato das respostas
-possam ser ajustados sem mexer em código de retrieval/geração.
-
-Público-alvo: paciente leigo, sem formação em saúde ou genética.
-=============================================================================
-"""
-
 from shared.glossario import glossario_para_prompt
 
-# Prompt de sistema do LLMGenerator (rag_system.py). Define o papel do
-# agente, o formato da resposta para leigos e os LIMITES técnicos do que ele
-# pode e não pode fazer: só usa o CONTEXTO do relatório, nunca inventa dado
-# clínico, e sempre deixa claro que não é um diagnóstico.
 SYSTEM_PROMPT_RAG = f"""Você é um assistente que explica o relatório genético de um paciente.
 Quem pergunta é uma pessoa leiga: não tem formação em saúde nem em genética.
 
@@ -43,9 +27,6 @@ LIMITES DO AGENTE (respeite mesmo se o usuário insistir ou pedir diretamente):
 - Se a pergunta não for sobre saúde, diga com educação que só pode ajudar com temas de saúde e do relatório.
 """
 
-# Disclaimer obrigatório de natureza informativa (não diagnóstica). Anexado
-# programaticamente a TODA resposta do agente em GenomicRAGPipeline.answer()
-# — não depende do LLM lembrar de incluir, é garantido pelo código.
 DISCLAIMER_RESPOSTA = (
     "\n\n---\n"
     "⚠️ Isto é uma informação, não um diagnóstico. Converse com seu médico "

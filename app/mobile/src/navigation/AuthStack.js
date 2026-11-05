@@ -7,6 +7,7 @@ import { fonts } from '../theme/typography';
 
 const Stack = createNativeStackNavigator();
 
+/** Define a navegação em pilha das telas de login, cadastro e escolha de nickname. */
 export default function AuthStack() {
   return (
     <Stack.Navigator

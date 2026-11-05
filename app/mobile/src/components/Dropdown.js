@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import styles from '../styles/dropdownStyles';
 
+/** Campo de seleção com opções exibidas em um modal estilo dropdown. */
 export default function Dropdown({ options, selectedValue, onValueChange }) {
   const [aberto, setAberto] = useState(false);
 
   const opcaoSelecionada = options.find((opcao) => opcao.value === selectedValue);
 
+  /** Seleciona a opção escolhida e fecha o modal. */
   const handleSelecionar = (valor) => {
     onValueChange(valor);
     setAberto(false);

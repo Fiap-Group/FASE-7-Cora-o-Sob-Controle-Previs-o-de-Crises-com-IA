@@ -1,17 +1,3 @@
-"""
-=============================================================================
-Lógica de conta de usuário — separada do router (equivalente a um Service
-do Nest), mesmo espírito de `shared/agentes/orquestracao.py` ficar
-separado do `src/modules/risco/router.py`.
-=============================================================================
-Senha nunca fica em texto puro: salt aleatório por usuário + SHA-256,
-tudo com `hashlib`/`secrets` da biblioteca padrão (sem dependência nova
-de criptografia). Não é o nível de um backend de produção real (não tem
-token/sessão autenticada — ver "Fora do escopo" do plano), mas já não
-guarda a senha como ela foi digitada.
-=============================================================================
-"""
-
 import hashlib
 import hmac
 import re
@@ -25,28 +11,36 @@ _REGEX_EMAIL = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 
 
 class EmailInvalido(ValueError):
+    """Erro de e-mail em formato inválido."""
+
     pass
 
 
 class EmailDuplicado(ValueError):
+    """Erro de e-mail já cadastrado para outra conta."""
+
     pass
 
 
 def _hash_senha(senha: str, salt: str) -> str:
+    """Calcula o hash SHA-256 da senha combinada com o salt."""
     return hashlib.sha256((salt + senha).encode()).hexdigest()
 
 
 def _criar_senha_hash(senha: str) -> str:
+    """Gera um salt aleatório e devolve o hash da senha no formato salt:hash."""
     salt = secrets.token_hex(16)
     return f"{salt}:{_hash_senha(senha, salt)}"
 
 
 def _senha_confere(senha: str, senha_hash: str) -> bool:
+    """Verifica se a senha informada corresponde ao hash armazenado."""
     salt, hash_esperado = senha_hash.split(":", 1)
     return hmac.compare_digest(_hash_senha(senha, salt), hash_esperado)
 
 
 def criar_usuario(db: Session, email: str, senha: str) -> Usuario:
+    """Cria e persiste um novo usuário, validando e-mail e evitando duplicidade."""
     if not _REGEX_EMAIL.match(email):
         raise EmailInvalido("E-mail inválido")
 
@@ -61,6 +55,7 @@ def criar_usuario(db: Session, email: str, senha: str) -> Usuario:
 
 
 def autenticar(db: Session, email: str, senha: str) -> Usuario | None:
+    """Autentica o usuário pelo e-mail e senha, devolvendo-o se a senha conferir."""
     usuario = db.query(Usuario).filter_by(email=email).first()
     if usuario and _senha_confere(senha, usuario.senha_hash):
         return usuario
@@ -68,6 +63,7 @@ def autenticar(db: Session, email: str, senha: str) -> Usuario | None:
 
 
 def definir_nickname(db: Session, usuario_id: int, nickname: str) -> Usuario | None:
+    """Define o nickname de um usuário existente."""
     usuario = db.query(Usuario).filter_by(id=usuario_id).first()
     if not usuario:
         return None

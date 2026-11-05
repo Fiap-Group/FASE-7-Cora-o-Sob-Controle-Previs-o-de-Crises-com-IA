@@ -1,6 +1,3 @@
-"""Lógica do "Perfil" — separada do router, mesmo espírito de
-`src/modules/auth/service.py`."""
-
 from sqlalchemy.orm import Session
 
 from shared.models import HistoricoRisco, Usuario
@@ -11,6 +8,7 @@ HISTORICO_LIMITE = 10
 
 
 def _resumo(h: HistoricoRisco) -> AvaliacaoResumo:
+    """Converte um registro de histórico de risco no formato de resumo da API."""
     return AvaliacaoResumo(
         criado_em=h.criado_em,
         probabilidade=h.probabilidade,
@@ -22,6 +20,7 @@ def _resumo(h: HistoricoRisco) -> AvaliacaoResumo:
 
 
 def buscar_perfil(db: Session, usuario_id: int) -> PerfilResponse | None:
+    """Monta a ficha de jogador de um usuário, com sua avaliação mais recente e histórico."""
     usuario = db.query(Usuario).filter_by(id=usuario_id).first()
     if not usuario:
         return None

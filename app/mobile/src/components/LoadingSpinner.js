@@ -2,6 +2,7 @@ import { View, ActivityIndicator, Text } from 'react-native';
 import { colors } from '../theme/colors';
 import styles from '../styles/loadingSpinnerStyles';
 
+/** Exibe um indicador de carregamento com mensagem opcional. */
 export default function LoadingSpinner({ message = 'Carregando...', size = 'large' }) {
    return (
       <View style={styles.container}>

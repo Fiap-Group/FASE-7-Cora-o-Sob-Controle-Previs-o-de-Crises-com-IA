@@ -8,11 +8,13 @@ import { avisar, confirmarAcao } from '../utils/alerta';
 import { colors } from '../theme/colors';
 import styles from '../styles/resumosScreenStyles';
 
+/** Tela de listagem dos resumos gerados, com opção de gerar um novo. */
 export default function ResumosScreen({ navigation }) {
   const [resumos, setResumos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [gerando, setGerando] = useState(false);
 
+  /** Busca a lista de resumos salvos. */
   const carregarResumos = useCallback(async () => {
     const lista = await buscarResumos();
     setResumos(lista);
@@ -25,10 +27,9 @@ export default function ResumosScreen({ navigation }) {
     }, [carregarResumos])
   );
 
+  /** Gera um novo resumo e atualiza a lista exibida. */
   const handleGerarResumo = async () => {
     setGerando(true);
-    // Simula a chegada de uma nova leva de dados do relatório (ex: nova semana).
-    // Em produção, este gatilho seria automático a cada nova inserção de dados.
     try {
       await gerarNovoResumo();
       await carregarResumos();
@@ -45,10 +46,12 @@ export default function ResumosScreen({ navigation }) {
     }
   };
 
+  /** Navega para a tela de conversa associada ao resumo selecionado. */
   const abrirResumo = (resumo) => {
     navigation.navigate('Chat', { sessaoId: resumo.sessao_id, resumoData: resumo.data_criacao });
   };
 
+  /** Confirma e executa a remoção de um resumo e sua conversa associada. */
   const handleRemover = (resumo) => {
     confirmarAcao(
       'Remover resumo',

@@ -1,6 +1,3 @@
-// Relatório genômico de exemplo (mesmo formato produzido pela Sprint 1),
-// usado para indexar o paciente no backend RAG (backend/rag_system.py)
-// antes da primeira pergunta ao agente. Ver backend/sample_sprint1_output.json.
 export default {
   paciente: {
     id: 'PAC-2024-001',

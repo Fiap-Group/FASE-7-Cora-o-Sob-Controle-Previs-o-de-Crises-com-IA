@@ -1,15 +1,3 @@
-"""
-Testes dos endpoints do módulo auth: cadastro, login e nickname.
-
-Não tocam no Postgres de verdade: `get_db` é substituído por uma Session
-ligada a um SQLite em memória (StaticPool — uma conexão só, compartilhada
-entre threads, porque as rotas são `def` síncronas e o FastAPI despacha
-pro threadpool; sem isso, duas chamadas no mesmo teste podiam cair em
-threads diferentes e ver bancos em memória diferentes). Mesmo princípio
-de "sem depender de serviço externo" já seguido em test_risco_endpoint.py
-(sem chamar o Gemini) e no listener MQTT (sem o broker real).
-"""
-
 import sys
 from collections.abc import Generator
 from pathlib import Path
@@ -39,9 +27,11 @@ USUARIO_EXEMPLO = {"email": "paciente@exemplo.com", "senha": "senha123"}
 
 @pytest.fixture
 def cliente() -> Generator[TestClient, None, None]:
+    """Cria um cliente de teste com um SQLite em memória no lugar do Postgres."""
     Base.metadata.create_all(_engine_teste)
 
     def _get_db_teste() -> Generator:
+        """Fornece uma sessão do banco de teste."""
         db = _SessionTeste()
         try:
             yield db
@@ -57,6 +47,7 @@ def cliente() -> Generator[TestClient, None, None]:
 
 
 def test_cadastro_cria_a_conta(cliente: TestClient):
+    """Testa que o cadastro cria a conta com os dados informados."""
     resposta = cliente.post("/api/auth/cadastro", json=USUARIO_EXEMPLO)
 
     assert resposta.status_code == 201
@@ -67,12 +58,14 @@ def test_cadastro_cria_a_conta(cliente: TestClient):
 
 
 def test_cadastro_com_email_invalido_retorna_400(cliente: TestClient):
+    """Testa que um e-mail em formato inválido é rejeitado no cadastro."""
     resposta = cliente.post("/api/auth/cadastro", json={"email": "nao-e-email", "senha": "senha123"})
 
     assert resposta.status_code == 400
 
 
 def test_cadastro_com_email_duplicado_retorna_409(cliente: TestClient):
+    """Testa que cadastrar o mesmo e-mail duas vezes é rejeitado."""
     cliente.post("/api/auth/cadastro", json=USUARIO_EXEMPLO)
     resposta = cliente.post("/api/auth/cadastro", json=USUARIO_EXEMPLO)
 
@@ -80,6 +73,7 @@ def test_cadastro_com_email_duplicado_retorna_409(cliente: TestClient):
 
 
 def test_login_com_credenciais_corretas_devolve_o_usuario(cliente: TestClient):
+    """Testa que o login com e-mail e senha corretos devolve os dados do usuário."""
     cliente.post("/api/auth/cadastro", json=USUARIO_EXEMPLO)
 
     resposta = cliente.post("/api/auth/login", json=USUARIO_EXEMPLO)
@@ -89,6 +83,7 @@ def test_login_com_credenciais_corretas_devolve_o_usuario(cliente: TestClient):
 
 
 def test_login_com_senha_errada_retorna_401(cliente: TestClient):
+    """Testa que o login com senha errada é rejeitado."""
     cliente.post("/api/auth/cadastro", json=USUARIO_EXEMPLO)
 
     resposta = cliente.post("/api/auth/login", json={**USUARIO_EXEMPLO, "senha": "senha_errada"})
@@ -97,6 +92,7 @@ def test_login_com_senha_errada_retorna_401(cliente: TestClient):
 
 
 def test_definir_nickname_atualiza_a_conta(cliente: TestClient):
+    """Testa que definir o nickname atualiza a conta do usuário."""
     usuario_id = cliente.post("/api/auth/cadastro", json=USUARIO_EXEMPLO).json()["id"]
 
     resposta = cliente.post("/api/auth/nickname", json={"usuario_id": usuario_id, "nickname": "Jonathan"})
@@ -106,6 +102,7 @@ def test_definir_nickname_atualiza_a_conta(cliente: TestClient):
 
 
 def test_definir_nickname_de_usuario_inexistente_retorna_404(cliente: TestClient):
+    """Testa que definir o nickname de um usuário inexistente devolve 404."""
     resposta = cliente.post("/api/auth/nickname", json={"usuario_id": 99999, "nickname": "Jonathan"})
 
     assert resposta.status_code == 404

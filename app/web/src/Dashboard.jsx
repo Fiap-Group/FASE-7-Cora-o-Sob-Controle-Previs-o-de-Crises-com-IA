@@ -11,6 +11,9 @@ const NIVEL_POR_CLASSIFICACAO = {
   'Baixo risco': 'baixo',
 };
 
+/**
+ * Dashboard principal: avalia o risco cardíaco a partir das métricas informadas e exibe o perfil do usuário.
+ */
 export default function Dashboard({ usuario, onSair }) {
   const [aba, setAba] = useState('avaliar');
   const [valores, setValores] = useState(VALORES_INICIAIS);
@@ -19,15 +22,21 @@ export default function Dashboard({ usuario, onSair }) {
   const [avaliando, setAvaliando] = useState(false);
   const [buscandoIot, setBuscandoIot] = useState(false);
 
+  /**
+   * Atualiza o valor digitado em um campo do formulário.
+   */
   const atualizarCampo = (chave, texto) => {
     setValores((atual) => ({ ...atual, [chave]: texto }));
   };
 
+  /**
+   * Preenche o formulário com os valores de exemplo.
+   */
   const handleUsarExemplo = () => setValores(VALORES_EXEMPLO);
 
-  // As 7 features que não vêm do ESP32 (métricas de operação hospitalar)
-  // ficam com o valor de exemplo — mesma lógica de
-  // app/mobile/src/screens/PrevisaoFormScreen.js.
+  /**
+   * Busca a leitura do sensor IoT e preenche as métricas vitais no formulário.
+   */
   const handleUsarLeituraIot = async () => {
     setBuscandoIot(true);
     setErro('');
@@ -54,6 +63,9 @@ export default function Dashboard({ usuario, onSair }) {
     }
   };
 
+  /**
+   * Valida e converte os valores do formulário em um payload numérico para a avaliação.
+   */
   const montarPayload = () => {
     const payload = {};
     for (const { chave, label } of RISCO_CARDIACO_FEATURES) {
@@ -67,6 +79,9 @@ export default function Dashboard({ usuario, onSair }) {
     return payload;
   };
 
+  /**
+   * Envia o payload para avaliação do risco cardíaco e exibe o resultado.
+   */
   const handleAvaliar = async (evento) => {
     evento.preventDefault();
     setErro('');

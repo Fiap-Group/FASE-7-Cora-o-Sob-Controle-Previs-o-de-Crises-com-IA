@@ -1,18 +1,3 @@
-"""
-=============================================================================
-Controller do módulo de risco cardíaco (equivalente a um @Controller do Nest)
-=============================================================================
-Expõe o fluxo multiagente (shared/agentes/) como endpoint HTTP: recebe os
-dados de operação hospitalar, roda a cadeia Orquestrador -> Analista de
-Risco -> Especialista em Protocolos -> Planejador de Resposta, e devolve a
-recomendação final já validada.
-
-Endpoints:
-    POST /api/risco/avaliar       recebe PacienteInput, devolve RecomendacaoFinal
-    GET  /api/risco/leitura-iot   última leitura publicada pelo ESP32 via MQTT
-=============================================================================
-"""
-
 import logging
 from typing import Callable
 
@@ -40,14 +25,7 @@ def avaliar_risco(
     avaliador: Callable[[dict], RecomendacaoFinal] = Depends(get_avaliador_risco),
     db: Session = Depends(get_db),
 ) -> RecomendacaoFinal:
-    """Roda o fluxo multiagente completo para os dados de operação recebidos.
-
-    A rota é `def` síncrona (não `async def`) de propósito: `avaliar_paciente`
-    chama `Runner.run_sync`, que roda seu próprio `asyncio.run()` por dentro —
-    isso só funciona numa thread sem event loop já ativo. Rotas `def` no
-    FastAPI são despachadas pro threadpool, igual já acontece hoje quando o
-    `demo.py` ou os testes chamam `avaliar_paciente` fora de um `async def`.
-    """
+    """Roda o fluxo multiagente completo para os dados de operação recebidos."""
     try:
         recomendacao = avaliador(paciente.como_dict())
     except Exception as e:
@@ -60,9 +38,7 @@ def avaliar_risco(
 
 
 def _registrar_historico(db: Session, paciente: AvaliarRiscoRequest, recomendacao: RecomendacaoFinal) -> None:
-    """Alimenta o "Perfil" gamificado (src/modules/perfil). Falha aqui não
-    pode derrubar a resposta da avaliação — mesmo espírito de "infra
-    opcional não quebra o que já funcionava" do listener MQTT."""
+    """Grava a avaliação no histórico do usuário, sem derrubar a resposta se isso falhar."""
     try:
         db.add(
             HistoricoRisco(
@@ -81,8 +57,7 @@ def _registrar_historico(db: Session, paciente: AvaliarRiscoRequest, recomendaca
 
 @router.get("/leitura-iot", response_model=LeituraIotResponse)
 def leitura_iot(leitura: LeituraIot = Depends(get_leitura_iot)) -> LeituraIotResponse:
-    """Snapshot em memória da última mensagem MQTT recebida do ESP32 — não
-    chama o modelo nem os agentes, só expõe o que já está guardado."""
+    """Devolve a última leitura de sinais vitais recebida do ESP32 via MQTT."""
     return LeituraIotResponse(
         conectado=leitura.conectado,
         fc_media=leitura.fc_media,

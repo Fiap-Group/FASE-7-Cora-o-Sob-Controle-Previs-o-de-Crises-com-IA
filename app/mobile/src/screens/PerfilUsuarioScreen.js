@@ -19,6 +19,7 @@ const STATUS_POR_CLASSIFICACAO = {
   'Baixo risco': colors.status.good,
 };
 
+/** Formata uma data ISO para o padrão "dd/mm/aa hh:mm" em português. */
 function formatarDataHora(iso) {
   const data = new Date(iso);
   return (
@@ -28,17 +29,14 @@ function formatarDataHora(iso) {
   );
 }
 
-// "Ficha de jogador": avatar + nickname, o risco mais recente como
-// estatística principal (reusa RiscoCard, mesmo componente da tela de
-// resultado da avaliação) e as 10 features daquela avaliação como grid de
-// estatísticas secundárias, seguido de um histórico curto. Busca no foco
-// da aba, igual ao padrão do DashboardScreen.
+/** Tela de perfil do usuário com avatar, risco mais recente, dados da avaliação e histórico. */
 export default function PerfilUsuarioScreen() {
   const { usuario } = useAuth();
   const [perfil, setPerfil] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
 
+  /** Busca o perfil do usuário logado, incluindo a avaliação mais recente. */
   const carregarPerfil = useCallback(async () => {
     if (!usuario) return;
     setCarregando(true);

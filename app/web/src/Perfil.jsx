@@ -7,13 +7,18 @@ const NIVEL_POR_CLASSIFICACAO = {
   'Baixo risco': 'baixo',
 };
 
-// Mesma paleta/cálculo de app/mobile/src/components/Avatar.js.
 const PALETA_CORES = ['#2a78d6', '#d6762a', '#2ad6a0', '#a02ad6', '#d62a5e', '#5e9e2a'];
 
+/**
+ * Escolhe uma cor de avatar com base no id do usuário.
+ */
 function corAvatar(usuarioId) {
   return PALETA_CORES[(usuarioId ?? 0) % PALETA_CORES.length];
 }
 
+/**
+ * Formata uma data ISO em data e hora no padrão brasileiro.
+ */
 function formatarDataHora(iso) {
   const data = new Date(iso);
   return (
@@ -23,10 +28,9 @@ function formatarDataHora(iso) {
   );
 }
 
-// "Ficha de jogador": avatar + nickname, o risco mais recente como
-// estatística principal e as 10 features daquela avaliação como grid de
-// estatísticas secundárias, seguido de um histórico curto — mesmo
-// conteúdo de app/mobile/src/screens/PerfilUsuarioScreen.js.
+/**
+ * Exibe o perfil do usuário: avaliação de risco mais recente, dados e histórico.
+ */
 export default function Perfil({ usuario }) {
   const [perfil, setPerfil] = useState(null);
   const [erro, setErro] = useState('');

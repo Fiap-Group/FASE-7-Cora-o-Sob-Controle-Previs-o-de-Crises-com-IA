@@ -1,12 +1,3 @@
-"""
-Testes estruturais do sistema multiagente (Fase 6, Parte 2): wiring dos 4
-agentes/handoffs e validação dos esquemas Pydantic. Nenhum teste aqui chama
-o Gemini de verdade — usamos uma chave falsa, já que `Agent`/`Runner` não
-fazem nenhuma chamada de rede só de serem construídos.
-
-Rodar com: pytest tests/unitarios/test_agentes_estrutura.py
-"""
-
 import sys
 from pathlib import Path
 from typing import cast
@@ -24,15 +15,14 @@ from shared.preditivo.protocolos import PROTOCOLOS  # noqa: E402
 
 @pytest.fixture(autouse=True)
 def chave_gemini_falsa(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Define uma chave Gemini falsa e limpa o cache do cliente entre os testes."""
     monkeypatch.setenv("GEMINI_API_KEY", "chave-fake-de-teste")
-    # construir_agentes()/construir_todos_os_agentes() usam um @lru_cache em
-    # obter_modelo_gemini() — limpa entre os testes pra não reaproveitar um
-    # cliente construído com outra chave.
     from shared.agentes.llm_config import obter_modelo_gemini
     obter_modelo_gemini.cache_clear()
 
 
 def test_construir_todos_os_agentes_monta_os_4_agentes_exigidos_pelo_enunciado():
+    """Testa que os 4 agentes exigidos são montados com os nomes esperados."""
     from shared.agentes.definicoes import construir_todos_os_agentes
 
     agentes = construir_todos_os_agentes()
@@ -46,12 +36,14 @@ def test_construir_todos_os_agentes_monta_os_4_agentes_exigidos_pelo_enunciado()
 
 
 def test_construir_agentes_devolve_o_orquestrador():
+    """Testa que construir_agentes() devolve o mesmo Orquestrador montado por construir_todos_os_agentes()."""
     from shared.agentes.definicoes import construir_agentes, construir_todos_os_agentes
 
     assert construir_agentes().name == construir_todos_os_agentes()["orquestrador"].name
 
 
 def test_orquestrador_tem_handoff_pro_analista_de_risco():
+    """Testa que o Orquestrador tem um único handoff para o Analista de Risco."""
     from shared.agentes.definicoes import construir_todos_os_agentes
 
     agentes = construir_todos_os_agentes()
@@ -61,6 +53,7 @@ def test_orquestrador_tem_handoff_pro_analista_de_risco():
 
 
 def test_analista_de_risco_tem_a_ferramenta_de_previsao_e_handoff_pro_especialista():
+    """Testa que o Analista de Risco tem a ferramenta de previsão e handoff para o Especialista."""
     from shared.agentes.definicoes import construir_todos_os_agentes
 
     analista = construir_todos_os_agentes()["analista_risco"]
@@ -69,6 +62,7 @@ def test_analista_de_risco_tem_a_ferramenta_de_previsao_e_handoff_pro_especialis
 
 
 def test_especialista_em_protocolos_tem_a_ferramenta_de_busca_e_handoff_pro_planejador():
+    """Testa que o Especialista em Protocolos tem a ferramenta de busca e handoff para o Planejador."""
     from shared.agentes.definicoes import construir_todos_os_agentes
 
     especialista = construir_todos_os_agentes()["especialista_protocolos"]
@@ -77,6 +71,7 @@ def test_especialista_em_protocolos_tem_a_ferramenta_de_busca_e_handoff_pro_plan
 
 
 def test_planejador_de_resposta_e_o_unico_com_output_type_recomendacao_final():
+    """Testa que só o Planejador de Resposta tem output_type definido como RecomendacaoFinal."""
     from shared.agentes.definicoes import construir_todos_os_agentes
 
     agentes = construir_todos_os_agentes()
@@ -86,9 +81,8 @@ def test_planejador_de_resposta_e_o_unico_com_output_type_recomendacao_final():
         assert agentes[nome].output_type is None
 
 
-# --- Validação de saída (RecomendacaoFinal) -----------------------------------
-
 def test_recomendacao_final_aceita_protocolos_validos():
+    """Testa que a RecomendacaoFinal aceita protocolos que pertencem à base conhecida."""
     recomendacao = RecomendacaoFinal(
         probabilidade=0.91,
         classificacao="Alto risco",
@@ -99,6 +93,7 @@ def test_recomendacao_final_aceita_protocolos_validos():
 
 
 def test_recomendacao_final_rejeita_protocolo_fora_da_base_conhecida():
+    """Testa que a RecomendacaoFinal rejeita um protocolo fora da base conhecida."""
     with pytest.raises(ValueError, match="fora da base conhecida"):
         RecomendacaoFinal(
             probabilidade=0.5,

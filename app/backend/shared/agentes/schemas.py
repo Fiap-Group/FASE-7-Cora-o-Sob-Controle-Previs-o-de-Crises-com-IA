@@ -1,15 +1,3 @@
-"""
-=============================================================================
-Esquemas (Pydantic) do sistema multiagente — Fase 6, Parte 2
-=============================================================================
-Usados como `output_type` dos agentes: a OpenAI Agents SDK força o LLM a
-devolver uma estrutura validada, em vez de texto livre. `RecomendacaoFinal`
-tem uma validação extra (`protocolos_sao_validos`) que rejeita qualquer
-protocolo que não esteja na base conhecida — essa é a "validação de saída"
-exigida pelo enunciado: pega o LLM inventando um protocolo que não existe.
-=============================================================================
-"""
-
 from typing import Literal
 
 from pydantic import BaseModel, model_validator
@@ -19,6 +7,8 @@ from shared.preditivo.protocolos import PROTOCOLOS
 
 
 class PacienteInput(BaseModel):
+    """Dados de entrada de um paciente usados pelo fluxo de agentes."""
+
     idade_media: float
     carga_sistema: float
     tempo_espera: float
@@ -31,19 +21,26 @@ class PacienteInput(BaseModel):
     disponibilidade_recursos: float
 
     def como_dict(self) -> dict[str, float]:
+        """Converte os dados do paciente num dicionário com as colunas usadas pelo modelo."""
         return {coluna: getattr(self, coluna) for coluna in COLUNAS_FEATURES}
 
 
 class AnaliseRisco(BaseModel):
+    """Resultado da análise de risco cardíaco de um paciente."""
+
     probabilidade: float
     classificacao: Literal["Alto risco", "Baixo risco"]
 
 
 class ProtocolosResultado(BaseModel):
+    """Lista de protocolos aplicáveis a um paciente."""
+
     protocolos: list[str]
 
 
 class RecomendacaoFinal(BaseModel):
+    """Recomendação final consolidada pelo fluxo multiagente."""
+
     probabilidade: float
     classificacao: Literal["Alto risco", "Baixo risco"]
     protocolos: list[str]
@@ -51,6 +48,7 @@ class RecomendacaoFinal(BaseModel):
 
     @model_validator(mode="after")
     def protocolos_sao_validos(self) -> "RecomendacaoFinal":
+        """Garante que todos os protocolos recomendados pertencem à base conhecida."""
         desconhecidos = set(self.protocolos) - set(PROTOCOLOS)
         if desconhecidos:
             raise ValueError(

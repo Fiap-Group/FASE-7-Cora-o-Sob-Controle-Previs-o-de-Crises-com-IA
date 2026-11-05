@@ -1,21 +1,3 @@
-"""
-=============================================================================
-Listener MQTT do módulo de risco cardíaco
-=============================================================================
-Assina o tópico publicado pelo ESP32 (iot/esp32/main.py, MicroPython) e guarda só a
-leitura mais recente em memória — não dispara a avaliação de risco (que
-chama o Gemini várias vezes via shared/agentes/) a cada mensagem. O ESP32
-publica a cada 2s; se cada mensagem disparasse a cadeia de agentes, a cota
-diária gratuita do Gemini estouraria em menos de um minuto. A avaliação
-continua manual, disparada pelo usuário no front
-com os valores desta leitura como ponto de partida.
-
-`get_leitura_iot` é a dependency (igual a `get_estado` do módulo RAG) —
-testes substituem por uma `LeituraIot` fake via `app.dependency_overrides`,
-sem conectar no broker de verdade.
-=============================================================================
-"""
-
 import json
 import logging
 import os
@@ -30,6 +12,8 @@ logger = logging.getLogger("genera_api")
 
 @dataclass
 class LeituraIot:
+    """Última leitura de sinais vitais recebida do ESP32 via MQTT."""
+
     conectado: bool = False
     fc_media: float | None = None
     pa_sistolica: float | None = None
@@ -41,12 +25,14 @@ _leitura = LeituraIot()
 
 
 def get_leitura_iot() -> LeituraIot:
+    """Devolve a instância compartilhada com a última leitura do ESP32."""
     return _leitura
 
 
 def _ao_conectar(
     client: mqtt.Client, _userdata: object, _connect_flags: object, codigo_motivo: object, _properties: object
 ) -> None:
+    """Assina o tópico MQTT do ESP32 ao conectar com sucesso no broker."""
     topico = os.getenv("MQTT_TOPIC", "esp32/cardio/data")
     if codigo_motivo == 0:
         _leitura.conectado = True
@@ -57,10 +43,12 @@ def _ao_conectar(
 
 
 def _ao_desconectar(_client: mqtt.Client, _userdata: object, *_args: object) -> None:
+    """Marca a leitura como desconectada do broker MQTT."""
     _leitura.conectado = False
 
 
 def _ao_receber_mensagem(_client: mqtt.Client, _userdata: object, msg: mqtt.MQTTMessage) -> None:
+    """Atualiza a última leitura de sinais vitais a partir da mensagem MQTT recebida."""
     try:
         dados = json.loads(msg.payload)
         _leitura.fc_media = float(dados["fc_media"])
@@ -72,10 +60,7 @@ def _ao_receber_mensagem(_client: mqtt.Client, _userdata: object, msg: mqtt.MQTT
 
 
 def iniciar_mqtt_listener() -> None:
-    """Conecta em segundo plano (client.loop_start(), thread própria do
-    paho-mqtt). Erro de conexão não derruba o backend: fica `conectado=False`
-    até o broker/ESP32 ficarem disponíveis — mesmo espírito de /api/chat sem
-    GEMINI_API_KEY configurada."""
+    """Conecta ao broker MQTT em segundo plano, sem derrubar o backend se a conexão falhar."""
     servidor = os.getenv("MQTT_SERVER")
     if not servidor:
         logger.info("MQTT_SERVER não configurado — listener de IoT desligado.", extra={"evento": "mqtt_desligado"})

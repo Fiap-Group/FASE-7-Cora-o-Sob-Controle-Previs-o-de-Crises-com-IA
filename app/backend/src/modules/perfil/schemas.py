@@ -1,7 +1,3 @@
-"""Schemas HTTP do módulo `perfil` — a "ficha de jogador" montada a
-partir da conta (shared/models.py:Usuario) e do histórico de avaliações
-(shared/models.py:HistoricoRisco)."""
-
 from datetime import datetime
 
 from pydantic import BaseModel
@@ -10,10 +6,7 @@ from src.modules.auth.schemas import UsuarioResponse
 
 
 class AvaliacaoResumo(BaseModel):
-    """Montado campo a campo em `service.py` a partir de um
-    `HistoricoRisco` (não via `from_attributes`): os nomes de coluna
-    (`dados_json`/`protocolos_json`) não batem com os do schema
-    (`dados`/`protocolos`) de propósito — aqui é o shape da API."""
+    """Resumo de uma avaliação de risco concluída, no shape exposto pela API."""
 
     criado_em: datetime
     probabilidade: float
@@ -24,6 +17,8 @@ class AvaliacaoResumo(BaseModel):
 
 
 class PerfilResponse(BaseModel):
+    """Ficha de jogador do usuário: conta, avaliação mais recente e histórico."""
+
     usuario: UsuarioResponse
     avaliacao_mais_recente: AvaliacaoResumo | None
     historico: list[AvaliacaoResumo]

@@ -1,30 +1,30 @@
-"""Schemas HTTP do módulo `auth` — shape de request/response, não dado de
-domínio (esse é `shared/models.py:Usuario`).
-
-E-mail fica como `str` simples (não `EmailStr`) pra não precisar da
-dependência extra `email-validator` só pra isso — o formato já é validado
-nos dois front-ends antes de chamar a API, e de novo em
-`service.py:criar_usuario` (defesa contra chamada direta à API)."""
-
 from pydantic import BaseModel
 
 
 class CadastroRequest(BaseModel):
+    """Dados recebidos para criar uma nova conta."""
+
     email: str
     senha: str
 
 
 class LoginRequest(BaseModel):
+    """Dados recebidos para autenticar um usuário."""
+
     email: str
     senha: str
 
 
 class NicknameRequest(BaseModel):
+    """Dados recebidos para definir o nickname de uma conta."""
+
     usuario_id: int
     nickname: str
 
 
 class UsuarioResponse(BaseModel):
+    """Dados do usuário devolvidos pela API."""
+
     id: int
     email: str
     nickname: str | None
