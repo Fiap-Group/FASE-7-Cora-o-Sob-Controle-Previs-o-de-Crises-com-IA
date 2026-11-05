@@ -1,13 +1,16 @@
 """
-Testes do endpoint POST /api/risco/avaliar.
+Testes dos endpoints do módulo risco: POST /api/risco/avaliar e
+GET /api/risco/leitura-iot.
 
-Não chamam o Gemini de verdade: o avaliador (fluxo multiagente) é
-substituído por uma função fake via `app.dependency_overrides`, igual ao
-padrão já usado em test_sprint4.py para o pipeline RAG.
+Não chamam o Gemini nem o broker MQTT de verdade: o avaliador (fluxo
+multiagente) e a leitura de IoT são substituídos por fakes via
+`app.dependency_overrides`, igual ao padrão já usado em test_sprint4.py
+para o pipeline RAG.
 """
 
 import sys
 from collections.abc import Generator
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -19,6 +22,7 @@ sys.path.insert(0, str(BACKEND))
 from shared.agentes.schemas import RecomendacaoFinal  # noqa: E402
 from src.main import app  # noqa: E402
 from src.modules.risco.dependencies import get_avaliador_risco  # noqa: E402
+from src.modules.risco.mqtt_listener import LeituraIot, get_leitura_iot  # noqa: E402
 
 PACIENTE_EXEMPLO = {
     "idade_media": 60,
@@ -87,3 +91,35 @@ def test_avaliar_risco_erro_do_avaliador_nao_vaza_detalhe_ao_cliente(cliente: Te
 
     assert resposta.status_code == 500
     assert resposta.json() == {"error": "Falha ao avaliar risco cardíaco"}
+
+
+def test_leitura_iot_sem_mensagem_ainda_devolve_desconectado(cliente: TestClient):
+    app.dependency_overrides[get_leitura_iot] = lambda: LeituraIot()
+
+    resposta = cliente.get("/api/risco/leitura-iot")
+
+    assert resposta.status_code == 200
+    corpo = resposta.json()
+    assert corpo["conectado"] is False
+    assert corpo["fc_media"] is None
+    assert corpo["pa_sistolica"] is None
+    assert corpo["spo2_media"] is None
+    assert corpo["recebido_em"] is None
+
+
+def test_leitura_iot_com_mensagem_recebida_devolve_os_valores(cliente: TestClient):
+    agora = datetime(2026, 1, 1, 12, 0, 0)
+    leitura_fake = LeituraIot(
+        conectado=True, fc_media=125.0, pa_sistolica=85.0, spo2_media=89.0, recebido_em=agora
+    )
+    app.dependency_overrides[get_leitura_iot] = lambda: leitura_fake
+
+    resposta = cliente.get("/api/risco/leitura-iot")
+
+    assert resposta.status_code == 200
+    corpo = resposta.json()
+    assert corpo["conectado"] is True
+    assert corpo["fc_media"] == 125.0
+    assert corpo["pa_sistolica"] == 85.0
+    assert corpo["spo2_media"] == 89.0
+    assert corpo["recebido_em"] == agora.isoformat()

@@ -119,3 +119,18 @@ export async function avaliarRiscoCardiaco(dadosOperacao) {
 
   return resposta.json();
 }
+
+// Busca a última leitura publicada pelo ESP32 via MQTT (fc_media,
+// pa_sistolica, spo2_media), guardada em memória pelo backend. Não dispara
+// nenhuma avaliação de risco — só lê o que já está guardado no backend. Se
+// o sensor nunca publicou nada ainda, volta { conectado: false, ... null }.
+export async function buscarLeituraIot() {
+  const resposta = await fetch(`${API_URL}/api/risco/leitura-iot`);
+
+  if (!resposta.ok) {
+    const erro = await resposta.json().catch(() => ({}));
+    throw new Error(mensagemDeErro(erro, 'Falha ao buscar a leitura do sensor.'));
+  }
+
+  return resposta.json();
+}

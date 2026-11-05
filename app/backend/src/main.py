@@ -22,6 +22,8 @@ Variáveis de ambiente relevantes:
 
 import os
 import sys
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # app/backend, p/ achar src/ e shared/
@@ -39,9 +41,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from src.modules.rag.router import router as rag_router
+from src.modules.risco.mqtt_listener import iniciar_mqtt_listener
 from src.modules.risco.router import router as risco_router
 
-app = FastAPI(title="CardioIA")
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    """Sobe o listener MQTT (src/modules/risco/mqtt_listener.py) junto do
+    boot do servidor. Conecta em background (client.loop_start()); se o
+    broker não estiver disponível agora, não impede o resto da API de
+    subir — ver docstring de iniciar_mqtt_listener."""
+    iniciar_mqtt_listener()
+    yield
+
+
+app = FastAPI(title="CardioIA", lifespan=lifespan)
 
 origens_permitidas = [
     origem.strip()

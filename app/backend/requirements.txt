@@ -23,3 +23,6 @@ scikit-learn>=1.5.0              # só como utilitário: split, StandardScaler, 
 
 # ── Multiagentes (shared/agentes) ───────────────────────────────────────
 openai-agents==0.22.2            # pin exato — superfície de API já validada
+
+# ── IoT (src/modules/risco/mqtt_listener.py) ────────────────────────────
+paho-mqtt>=2.1.0                 # assina o tópico MQTT publicado pelo ESP32

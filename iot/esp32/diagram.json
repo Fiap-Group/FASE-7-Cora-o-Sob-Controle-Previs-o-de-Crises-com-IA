@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "author": "Uri Shaked",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": -48, "left": -71.96, "attrs": {} },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "pot_fc",
+      "top": -124,
+      "left": 110,
+      "attrs": { "label": "FC (bpm)" }
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "pot_pa",
+      "top": -20,
+      "left": 110,
+      "attrs": { "label": "PA sistolica" }
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "pot_spo2",
+      "top": 84,
+      "left": 110,
+      "attrs": { "label": "SPO2 (%)" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led1",
+      "top": -138,
+      "left": 61.4,
+      "attrs": { "color": "red", "label": "WiFi" }
+    },
+    { "type": "wokwi-resistor", "id": "res1", "top": -90, "left": 0, "attrs": { "value": "220" } }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+
+    [ "pot_fc:SIG", "esp:34", "green", [] ],
+    [ "pot_fc:VCC", "esp:3V3", "red", [] ],
+    [ "pot_fc:GND", "esp:GND.1", "black", [] ],
+
+    [ "pot_pa:SIG", "esp:35", "green", [] ],
+    [ "pot_pa:VCC", "esp:3V3", "red", [] ],
+    [ "pot_pa:GND", "esp:GND.1", "black", [] ],
+
+    [ "pot_spo2:SIG", "esp:32", "green", [] ],
+    [ "pot_spo2:VCC", "esp:3V3", "red", [] ],
+    [ "pot_spo2:GND", "esp:GND.1", "black", [] ],
+
+    [ "led1:C", "esp:GND.2", "black", [ "v0" ] ],
+    [ "led1:A", "res1:2", "red", [ "v0" ] ],
+    [ "res1:1", "esp:2", "red", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}

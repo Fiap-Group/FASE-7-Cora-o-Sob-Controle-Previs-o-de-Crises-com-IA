@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { RISCO_CARDIACO_FEATURES } from '../data/riscoCardiacoFeatures';
 import { avaliarRisco } from '../services/riscoService';
+import { buscarLeituraIot } from '../services/api';
 import { avisar } from '../utils/alerta';
 import { colors } from '../theme/colors';
 import styles from '../styles/ancestralidadeScreenStyles';
@@ -12,6 +13,7 @@ const VALORES_EXEMPLO = Object.fromEntries(RISCO_CARDIACO_FEATURES.map((f) => [f
 export default function PrevisaoFormScreen({ navigation }) {
   const [valores, setValores] = useState(VALORES_INICIAIS);
   const [enviando, setEnviando] = useState(false);
+  const [buscandoIot, setBuscandoIot] = useState(false);
 
   const atualizarCampo = (chave, texto) => {
     setValores((atual) => ({ ...atual, [chave]: texto }));
@@ -19,6 +21,37 @@ export default function PrevisaoFormScreen({ navigation }) {
 
   const handleUsarExemplo = () => {
     setValores(VALORES_EXEMPLO);
+  };
+
+  // As 7 features que não vêm do ESP32 (métricas de operação hospitalar,
+  // não leituras de um sensor de pulso) ficam com o valor de exemplo —
+  // ainda editáveis antes de enviar.
+  const handleUsarLeituraIot = async () => {
+    setBuscandoIot(true);
+    try {
+      const leitura = await buscarLeituraIot();
+      const semLeitura =
+        !leitura.conectado || leitura.fc_media == null || leitura.pa_sistolica == null || leitura.spo2_media == null;
+
+      if (semLeitura) {
+        avisar(
+          'Sensor sem leitura ainda',
+          'O ESP32 ainda não publicou nenhuma leitura. Verifique se a simulação no Wokwi está rodando e conectada ao broker MQTT.'
+        );
+        return;
+      }
+
+      setValores({
+        ...VALORES_EXEMPLO,
+        fc_media: String(leitura.fc_media),
+        pa_sistolica: String(leitura.pa_sistolica),
+        spo2_media: String(leitura.spo2_media),
+      });
+    } catch (erro) {
+      avisar('Não foi possível buscar a leitura do sensor', erro.message);
+    } finally {
+      setBuscandoIot(false);
+    }
   };
 
   const montarPayload = () => {
@@ -79,6 +112,15 @@ export default function PrevisaoFormScreen({ navigation }) {
           ))}
 
           <View style={styles.botoesLinha}>
+            <TouchableOpacity
+              style={styles.botaoSecundario}
+              onPress={handleUsarLeituraIot}
+              disabled={enviando || buscandoIot}
+            >
+              <Text style={styles.botaoSecundarioTexto}>
+                {buscandoIot ? 'Buscando...' : 'Usar leitura do sensor (IoT)'}
+              </Text>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.botaoSecundario} onPress={handleUsarExemplo} disabled={enviando}>
               <Text style={styles.botaoSecundarioTexto}>Usar exemplo</Text>
             </TouchableOpacity>
