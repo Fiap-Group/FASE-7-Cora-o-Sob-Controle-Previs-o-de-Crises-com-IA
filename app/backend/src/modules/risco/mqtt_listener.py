@@ -2,7 +2,7 @@
 =============================================================================
 Listener MQTT do módulo de risco cardíaco
 =============================================================================
-Assina o tópico publicado pelo ESP32 (iot/esp32/main.cpp) e guarda só a
+Assina o tópico publicado pelo ESP32 (iot/esp32/main.py, MicroPython) e guarda só a
 leitura mais recente em memória — não dispara a avaliação de risco (que
 chama o Gemini várias vezes via shared/agentes/) a cada mensagem. O ESP32
 publica a cada 2s; se cada mensagem disparasse a cadeia de agentes, a cota

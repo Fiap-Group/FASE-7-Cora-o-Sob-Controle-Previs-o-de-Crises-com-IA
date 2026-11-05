@@ -54,6 +54,5 @@ __pycache__/
 *.pyc
 .pytest_cache/
 
-# IoT (ESP32/PlatformIO)
-iot/esp32/.env
-iot/esp32/.pio/
+# IoT (ESP32/MicroPython)
+iot/esp32/secrets.py
