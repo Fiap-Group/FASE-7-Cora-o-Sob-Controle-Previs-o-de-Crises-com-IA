@@ -8,7 +8,8 @@ Risco -> Especialista em Protocolos -> Planejador de Resposta, e devolve a
 recomendação final já validada.
 
 Endpoints:
-    POST /api/risco/avaliar    recebe PacienteInput, devolve RecomendacaoFinal
+    POST /api/risco/avaliar       recebe PacienteInput, devolve RecomendacaoFinal
+    GET  /api/risco/leitura-iot   última leitura publicada pelo ESP32 via MQTT
 =============================================================================
 """
 
@@ -22,6 +23,8 @@ from shared.agentes.schemas import PacienteInput, RecomendacaoFinal
 from src.common.erros import erro_interno
 
 from .dependencies import get_avaliador_risco
+from .mqtt_listener import LeituraIot, get_leitura_iot
+from .schemas import LeituraIotResponse
 
 logger = logging.getLogger("genera_api")
 
@@ -45,3 +48,16 @@ def avaliar_risco(
         return avaliador(paciente.como_dict())
     except Exception as e:
         raise erro_interno(logger, "Falha ao avaliar risco cardíaco", e)
+
+
+@router.get("/leitura-iot", response_model=LeituraIotResponse)
+def leitura_iot(leitura: LeituraIot = Depends(get_leitura_iot)) -> LeituraIotResponse:
+    """Snapshot em memória da última mensagem MQTT recebida do ESP32 — não
+    chama o modelo nem os agentes, só expõe o que já está guardado."""
+    return LeituraIotResponse(
+        conectado=leitura.conectado,
+        fc_media=leitura.fc_media,
+        pa_sistolica=leitura.pa_sistolica,
+        spo2_media=leitura.spo2_media,
+        recebido_em=leitura.recebido_em,
+    )

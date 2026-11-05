@@ -53,3 +53,7 @@ app/dist/
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# IoT (ESP32/PlatformIO)
+iot/esp32/.env
+iot/esp32/.pio/
