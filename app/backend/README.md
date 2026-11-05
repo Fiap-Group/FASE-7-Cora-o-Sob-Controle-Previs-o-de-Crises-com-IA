@@ -107,8 +107,7 @@ bash scripts/ci_local.sh          # testes (sem chamar o Gemini) e checagem de t
 ```
 
 Os testes ficam em `tests/` e não chamam o LLM nem baixam o modelo de
-embeddings. A avaliação das respostas com o Gemini é separada:
-`python avaliacao/avaliar.py --com-llm --limite 10` (consome a cota diária).
+embeddings.
 
 ## Arquivos
 
@@ -127,7 +126,6 @@ embeddings. A avaliação das respostas com o Gemini é separada:
 - `shared/agentes/`: schemas Pydantic, configuração do Gemini e os 4 agentes
   (Orquestrador → Analista de Risco → Especialista em Protocolos →
   Planejador de Resposta).
-- `avaliacao/`: gabarito, avaliação do modelo e validação das respostas (RAG).
-- `scripts/`: rotina de operação e checagens locais (`ci_local.sh`).
+- `scripts/`: checagens locais (`ci_local.sh`).
 - `tests/`: testes automatizados.
 - `sample_sprint1_output.json`: exemplo de relatório genômico.

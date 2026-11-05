@@ -64,8 +64,7 @@ app/                              # App React Native/Expo (front web)
       rag_system.py, prompts.py, glossario.py, observabilidade.py
       preditivo/                  # Parte 1: modelo PyTorch de risco cardíaco
       agentes/                    # Parte 2: sistema multiagente (OpenAI Agents SDK + Gemini)
-    avaliacao/                    # Gabarito, avaliação do modelo e validação (RAG)
-    scripts/                      # Rotina de operação e checagens locais
+    scripts/                      # Checagens locais (ci_local.sh)
     tests/                        # Testes automatizados (sem chamar o LLM)
     Dockerfile, docker-compose.yml
     sample_sprint1_output.json    # Exemplo de relatório genômico
@@ -116,7 +115,6 @@ npx expo start --web                  # abre em http://localhost:8081
 ```
 
 - Testes e checagem de tipos (sem chamar o Gemini): `bash app/backend/scripts/ci_local.sh`.
-- Avaliação do RAG com o Gemini (usa a cota diária): `python avaliacao/avaliar.py --com-llm --limite 10`, em `app/backend`.
 - Treinar o modelo preditivo: `python -m shared.preditivo.treinar`, em `app/backend`.
 - Demo do multiagente (precisa de `GEMINI_API_KEY`): `python -m shared.agentes.demo`, em `app/backend`.
 - Detalhes do backend (endpoints, variáveis de ambiente, curl): `app/backend/README.md`.
