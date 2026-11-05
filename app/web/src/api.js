@@ -24,11 +24,11 @@ export async function buscarLeituraIot() {
 // Envia os dados de operação hospitalar ao sistema multiagente de previsão
 // de risco cardíaco (POST /api/risco/avaliar) e retorna { probabilidade,
 // classificacao, protocolos, recomendacao }.
-export async function avaliarRiscoCardiaco(dadosOperacao) {
+export async function avaliarRiscoCardiaco(dadosOperacao, usuarioId) {
   const resposta = await fetch(`${API_URL}/api/risco/avaliar`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(dadosOperacao),
+    body: JSON.stringify(usuarioId != null ? { ...dadosOperacao, usuario_id: usuarioId } : dadosOperacao),
   });
 
   if (!resposta.ok) {
@@ -82,6 +82,19 @@ export async function definirNickname(usuarioId, nickname) {
   if (!resposta.ok) {
     const erro = await resposta.json().catch(() => ({}));
     throw new Error(mensagemDeErro(erro, 'Falha ao salvar o nickname.'));
+  }
+
+  return resposta.json();
+}
+
+// "Ficha de jogador": conta + avaliação de risco mais recente em destaque +
+// histórico curto (ver app/backend/src/modules/perfil).
+export async function buscarPerfil(usuarioId) {
+  const resposta = await fetch(`${API_URL}/api/perfil/${usuarioId}`);
+
+  if (!resposta.ok) {
+    const erro = await resposta.json().catch(() => ({}));
+    throw new Error(mensagemDeErro(erro, 'Falha ao buscar o perfil.'));
   }
 
   return resposta.json();

@@ -21,6 +21,7 @@ import AuthStack from './src/navigation/AuthStack';
 import DashboardScreen from './src/screens/DashboardScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import PerfilUsuarioScreen from './src/screens/PerfilUsuarioScreen';
 import AnaliseStack from './src/navigation/AnaliseStack';
 import PrevisaoStack from './src/navigation/PrevisaoStack';
 const Tab = createBottomTabNavigator();
@@ -128,6 +129,16 @@ function AppConteudo() {
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
               <Text style={{ fontSize: size / 2, color, fontFamily: fonts.bold }}>PREVISÃO</Text>
+            ),
+          }}
+        />
+
+        <Tab.Screen
+          name="Perfil"
+          component={PerfilUsuarioScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Text style={{ fontSize: size / 2, color, fontFamily: fonts.bold }}>PERFIL</Text>
             ),
           }}
         />

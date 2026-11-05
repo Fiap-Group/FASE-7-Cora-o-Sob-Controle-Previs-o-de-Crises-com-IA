@@ -16,7 +16,7 @@ import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
-BACKEND = Path(__file__).resolve().parents[1]
+BACKEND = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(BACKEND))
 
 from shared.rag_system import Chunk, GenomicChunker, TextCleaner, VectorStore  # noqa: E402

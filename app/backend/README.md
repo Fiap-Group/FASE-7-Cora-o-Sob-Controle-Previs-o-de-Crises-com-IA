@@ -106,8 +106,11 @@ pip install pytest pyright
 bash scripts/ci_local.sh          # testes (sem chamar o Gemini) e checagem de tipos
 ```
 
-Os testes ficam em `tests/` e não chamam o LLM nem baixam o modelo de
-embeddings.
+Uma única suíte (`pytest tests/`), dividida em `tests/unitarios/`
+(módulo preditivo e wiring dos agentes — sem HTTP, sem banco) e
+`tests/integracao/` (endpoints FastAPI via `TestClient`, com Postgres
+substituído por SQLite em memória). Não chama o LLM nem baixa o modelo
+de embeddings.
 
 ## Arquivos
 
@@ -127,5 +130,5 @@ embeddings.
   (Orquestrador → Analista de Risco → Especialista em Protocolos →
   Planejador de Resposta).
 - `scripts/`: checagens locais (`ci_local.sh`).
-- `tests/`: testes automatizados.
+- `tests/`: testes automatizados (`unitarios/` + `integracao/`).
 - `sample_sprint1_output.json`: exemplo de relatório genômico.

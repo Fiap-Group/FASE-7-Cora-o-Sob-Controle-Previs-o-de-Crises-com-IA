@@ -155,3 +155,79 @@ button.primario {
   color: var(--nivel-alto);
   font-size: 0.8rem;
 }
+
+.botoes-aba {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.perfil-cabecalho {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.avatar-circulo {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2.2rem;
+  font-weight: 800;
+}
+
+.perfil-cabecalho h2 {
+  margin: 10px 0 0;
+}
+
+.perfil-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.perfil-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  min-width: 140px;
+  flex: 1 1 140px;
+}
+
+.perfil-chip-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.perfil-chip-valor {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.historico {
+  display: flex;
+  flex-direction: column;
+}
+
+.historico-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.historico-badge {
+  font-size: 0.8rem;
+  font-weight: 600;
+}

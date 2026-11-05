@@ -1,25 +1,10 @@
 """
-=============================================================================
-Providers do módulo de autenticação
-=============================================================================
-`get_db` é a dependency que abre/fecha uma Session do SQLAlchemy por
-request — mesmo mecanismo de DI já usado em `get_avaliador_risco`
-(módulo risco) e `get_estado` (módulo rag). Testes substituem por uma
-Session ligada a um SQLite em memória via `app.dependency_overrides`,
-sem precisar do Postgres de verdade no ar.
-=============================================================================
+`get_db` em si mora em `shared/db.py` (infraestrutura genérica de
+sessão, reusada por `risco` e `perfil` também) — isso aqui só reexporta,
+pra manter o padrão de cada módulo importar sua dependency a partir do
+próprio `.dependencies` (igual `get_avaliador_risco`/`get_leitura_iot`).
 """
 
-from collections.abc import Generator
+from shared.db import get_db
 
-from sqlalchemy.orm import Session
-
-from shared.db import SessionLocal
-
-
-def get_db() -> Generator[Session, None, None]:
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+__all__ = ["get_db"]

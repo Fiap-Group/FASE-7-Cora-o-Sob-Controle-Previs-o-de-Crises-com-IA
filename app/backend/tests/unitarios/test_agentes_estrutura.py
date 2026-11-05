@@ -4,7 +4,7 @@ agentes/handoffs e validação dos esquemas Pydantic. Nenhum teste aqui chama
 o Gemini de verdade — usamos uma chave falsa, já que `Agent`/`Runner` não
 fazem nenhuma chamada de rede só de serem construídos.
 
-Rodar com: pytest tests/test_agentes_estrutura.py
+Rodar com: pytest tests/unitarios/test_agentes_estrutura.py
 """
 
 import sys
@@ -13,7 +13,7 @@ from typing import cast
 
 import pytest
 
-BACKEND = Path(__file__).resolve().parents[1]
+BACKEND = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(BACKEND))
 
 from agents import Handoff  # noqa: E402
