@@ -29,17 +29,21 @@ npm run dev   # abre em http://localhost:5173
 Aponta pro backend em `http://localhost:5000` por padrão. Pra apontar pra
 outro backend, defina `VITE_API_URL` num `.env` local (não versionado).
 
-## Deploy (Vercel — já decidido)
+## Deploy (Vercel — publicado)
+
+**URL de produção:** https://fase-7-coracao-sob-controle-previsao.vercel.app
 
 - **Root Directory** do projeto na Vercel: `app/web`.
 - Build command/output: padrão do Vite (`npm run build` → `dist/`), a
   Vercel detecta sozinha.
 - `vercel.json` já tem o rewrite de SPA (`/* → /index.html`), exigido pelo
   enunciado.
-- Variável de ambiente a configurar no painel: `VITE_API_URL` → URL
-  pública do backend. **Pendente**: só dá pra preencher depois que o
-  backend tiver um endereço público decidido (ver
-  `app/backend/README.md#deploy`).
+- CI/CD: cada push no branch conectado dispara um novo deploy automático.
+- Variável de ambiente configurada no painel: `VITE_API_URL` →
+  `https://remindful-unsliced-glisten.ngrok-free.dev` (túnel ngrok do
+  backend, domínio fixo — ver `app/backend/README.md#deploy`). **O
+  dashboard web só consegue falar com o backend enquanto esse túnel
+  estiver ligado** — liga-se na hora de testar/gravar a demonstração.
 
 ## Arquivos
 
