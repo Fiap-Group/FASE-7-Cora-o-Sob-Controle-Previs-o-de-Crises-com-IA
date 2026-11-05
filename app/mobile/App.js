@@ -14,6 +14,8 @@ import { fonts } from './src/theme/typography';
 import styles from './src/styles/appStyles';
 import LoadingSpinner from './src/components/LoadingSpinner';
 import { initDatabase } from './src/db/database';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
+import AuthStack from './src/navigation/AuthStack';
 
 // Importar as telas
 import DashboardScreen from './src/screens/DashboardScreen';
@@ -38,6 +40,31 @@ export default function App() {
 
   if (!fontsLoaded || !dbPronto) {
     return <LoadingSpinner message="Carregando..." />;
+  }
+
+  return (
+    <AuthProvider>
+      <AppConteudo />
+    </AuthProvider>
+  );
+}
+
+// A conta mora no backend (src/modules/auth) e é compartilhada com o app
+// web — sem sessão lembrada neste aparelho, só as telas de Login/Cadastro
+// aparecem; o resto do app (abas) só depois de autenticado.
+function AppConteudo() {
+  const { usuario, carregando } = useAuth();
+
+  if (carregando) {
+    return <LoadingSpinner message="Carregando..." />;
+  }
+
+  if (!usuario) {
+    return (
+      <NavigationContainer>
+        <AuthStack />
+      </NavigationContainer>
+    );
   }
 
   return (

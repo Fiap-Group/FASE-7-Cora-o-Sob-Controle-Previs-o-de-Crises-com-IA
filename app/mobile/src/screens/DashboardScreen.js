@@ -6,9 +6,11 @@ import AncestralidadeBarra from '../components/AncestralidadeBarra';
 import Disclaimer from '../components/Disclaimer';
 import { buscarPerfilGenomicoAtual } from '../db/database';
 import { mapearRiscos, riscoDeMaiorSeveridade, topAncestralidade } from '../utils/perfilGenomico';
+import { useAuth } from '../context/AuthContext';
 import styles from '../styles/dashboardScreenStyles';
 
 export default function DashboardScreen({ navigation }) {
+  const { usuario, sair } = useAuth();
   const [riscoDestaque, setRiscoDestaque] = useState(null);
   const [ancestralidadeDestaque, setAncestralidadeDestaque] = useState([]);
 
@@ -27,7 +29,12 @@ export default function DashboardScreen({ navigation }) {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.saudacao}>Olá!</Text>
+        <View style={styles.secaoHeader}>
+          <Text style={styles.saudacao}>Olá, {usuario?.nickname}!</Text>
+          <TouchableOpacity onPress={sair}>
+            <Text style={styles.verTudo}>Sair</Text>
+          </TouchableOpacity>
+        </View>
         <Text style={styles.subtitulo}>Aqui está um resumo do seu perfil genético.</Text>
 
         <Disclaimer texto="As informações a seguir são interpretações do seu relatório genético e não substituem uma avaliação médica." />

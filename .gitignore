@@ -38,8 +38,8 @@ yarn-error.*
 *.tsbuildinfo
 
 # generated native folders
-/app/ios
-/app/android
+/app/mobile/ios
+/app/mobile/android
 
 # backend (Python)
 app/backend/__pycache__/
@@ -47,7 +47,6 @@ app/backend/.venv/
 app/backend/.env
 app/backend/shared/logs/
 app/backend/.pytest_cache/
-app/dist/
 
 # caches do Python
 __pycache__/
