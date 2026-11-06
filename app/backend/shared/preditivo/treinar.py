@@ -13,7 +13,7 @@ def main() -> None:
 
     print(f"\nAcurácia: {metricas['acuracia']:.2%}")
     print(f"\nMatriz de confusão:\n{metricas['matriz_confusao']}")
-    print(f"\nRelatório de classificação:")
+    print("\nRelatório de classificação:")
     relatorio = metricas["relatorio"]
     for classe in ("0", "1"):
         linha = relatorio[classe]
