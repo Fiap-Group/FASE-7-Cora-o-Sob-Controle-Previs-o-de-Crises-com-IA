@@ -624,14 +624,16 @@ class LLMGenerator:
             raise ImportError("pip install anthropic")
 
     def _init_gemini(self):
-        """Inicializa o cliente da API do Gemini."""
+        """Inicializa um cliente da API do Gemini por chave configurada (GEMINI_API_KEYS pode
+        ter mais de uma, uma por conta Google), pra poder trocar de chave se uma esgotar a
+        cota do dia. Ver shared/chaves_llm.py."""
         try:
             from google import genai
-            import os
-            api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
-            if not api_key:
-                raise ValueError("Variável de ambiente GEMINI_API_KEY (ou GOOGLE_API_KEY) não definida.")
-            self._client = genai.Client(api_key=api_key)
+            from shared.chaves_llm import ler_chaves_gemini
+
+            self._clientes_gemini = [genai.Client(api_key=chave) for chave in ler_chaves_gemini()]
+            self._indice_cliente_gemini = 0
+            self._client = self._clientes_gemini[0]
         except ImportError:
             raise ImportError("pip install google-genai")
 
@@ -639,7 +641,8 @@ class LLMGenerator:
         """Gera a resposta do LLM combinando o contexto recuperado com a pergunta, com retentativas."""
         user_message = f"{context}\n\nPERGUNTA DO PACIENTE: {question}"
 
-        max_tentativas = 3
+        chaves_gemini_restantes = len(self._clientes_gemini) if self.backend == "gemini" else 1
+        max_tentativas = max(3, chaves_gemini_restantes)
         ultimo_erro = None
         for tentativa in range(max_tentativas):
             try:
@@ -653,6 +656,15 @@ class LLMGenerator:
                 ultimo_erro = erro
 
                 if self._erro_e_cota_esgotada(erro):
+                    if self.backend == "gemini" and chaves_gemini_restantes > 1:
+                        chaves_gemini_restantes -= 1
+                        self._indice_cliente_gemini = (self._indice_cliente_gemini + 1) % len(self._clientes_gemini)
+                        self._client = self._clientes_gemini[self._indice_cliente_gemini]
+                        logger.warning(
+                            f"Cota do Gemini esgotada numa chave, trocando pra próxima "
+                            f"({chaves_gemini_restantes} restante(s))..."
+                        )
+                        continue
                     raise RuntimeError(
                         "O limite gratuito de uso do modelo de IA foi atingido por hoje. "
                         "Tente novamente amanhã, quando a cota diária for renovada."
