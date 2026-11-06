@@ -42,6 +42,3 @@ export const paletaEscura = {
 
   status,
 };
-
-/** Mantido como padrão (tema claro) para qualquer uso fora do contexto de tema. Prefira `useTema()`. */
-export const colors = paletaClara;

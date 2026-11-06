@@ -147,7 +147,7 @@ tiver expirado.
 |---|---|---|
 | Backend | Túnel ngrok, domínio fixo `remindful-unsliced-glisten.ngrok-free.dev` (ver `app/backend/README.md#deploy`) | Decidido — liga só quando for demonstrar/testar fim-a-fim |
 | Web | **Publicado:** https://fase-7-coracao-sob-controle-previsao.vercel.app (Vercel, Root Directory `app/web`, CI/CD a cada push) | ✅ Feito |
-| Mobile | **Publicado:** https://expo.dev/artifacts/eas/5JQjsDqTNVL09KprNsvvtUFqmQBj-1ECYEkSLfy766M.apk (`.apk` via `eas build`, perfil `preview` — ver `app/mobile/README.md#gerar-o-apk-eas-build--publicado`) | ✅ Feito |
+| Mobile | **Publicado:** https://expo.dev/artifacts/eas/b2WWbMLX0PBgg02x2llJ0ZgWl-_Wcosrzd5SJqXA4do.apk (`.apk` via `eas build`, perfil `preview` — ver `app/mobile/README.md#gerar-o-apk-eas-build--publicado`) | ✅ Feito |
 | IoT (ESP32) | **Simulação pública:** https://wokwi.com/projects/479957875310448641 (Wokwi, MicroPython — publica leituras via MQTT real, ver `iot/esp32/`) | ✅ Feito |
 
 O túnel ngrok não fica ligado 24/7: o enunciado só exige o backend

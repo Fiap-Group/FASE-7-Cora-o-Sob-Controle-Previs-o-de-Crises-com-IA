@@ -28,7 +28,6 @@ _CONDICOES = [
 
 
 def avaliar_protocolos(paciente: dict[str, Any], pico_risco_previsto: int) -> list[str]:
-    """Devolve os protocolos cuja condição real é verdadeira para o paciente."""
     return [
         protocolo
         for protocolo, condicao in zip(PROTOCOLOS, _CONDICOES)

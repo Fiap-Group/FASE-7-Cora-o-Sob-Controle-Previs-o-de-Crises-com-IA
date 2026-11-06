@@ -3,18 +3,12 @@ import { buscarPerfilGenomicoAtual } from './genomicoDb';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const HEADERS_PADRAO = { 'X-Client-Platform': 'web', 'ngrok-skip-browser-warning': 'true' };
 
-/**
- * Monta a mensagem de erro a partir do corpo da resposta, com um texto padrão de reserva.
- */
 function mensagemDeErro(corpoErro, mensagemPadrao) {
   return corpoErro.details || corpoErro.error || mensagemPadrao;
 }
 
 let indexadoNestaSessao = false;
 
-/**
- * Solicita ao backend que apague o índice do relatório genômico, ignorando falhas de conexão.
- */
 export async function apagarIndiceNoBackend() {
   try {
     await fetch(`${API_URL}/api/reset`, { method: 'POST', headers: HEADERS_PADRAO });
@@ -24,9 +18,6 @@ export async function apagarIndiceNoBackend() {
   indexadoNestaSessao = false;
 }
 
-/**
- * Indexa o relatório genômico no backend RAG.
- */
 export async function indexarRelatorio(perfilJson) {
   const resposta = await fetch(`${API_URL}/api/index`, {
     method: 'POST',
@@ -57,9 +48,6 @@ async function garantirIndexacao() {
   await indexarRelatorio(perfilSalvo);
 }
 
-/**
- * Envia a pergunta ao endpoint de chat do backend.
- */
 async function chamarChat(pergunta) {
   return fetch(`${API_URL}/api/chat`, {
     method: 'POST',
@@ -95,9 +83,6 @@ export async function perguntarAoAgente(pergunta) {
   return resposta.json();
 }
 
-/**
- * Busca a última leitura publicada pelo sensor ESP32 via MQTT.
- */
 export async function buscarLeituraIot() {
   const resposta = await fetch(`${API_URL}/api/risco/leitura-iot`, { headers: HEADERS_PADRAO });
 
@@ -109,9 +94,6 @@ export async function buscarLeituraIot() {
   return resposta.json();
 }
 
-/**
- * Envia os dados de operação hospitalar para o sistema multiagente avaliar o risco cardíaco.
- */
 export async function avaliarRiscoCardiaco(dadosOperacao, usuarioId) {
   const resposta = await fetch(`${API_URL}/api/risco/avaliar`, {
     method: 'POST',
@@ -127,9 +109,6 @@ export async function avaliarRiscoCardiaco(dadosOperacao, usuarioId) {
   return resposta.json();
 }
 
-/**
- * Cadastra uma nova conta de usuário.
- */
 export async function cadastrar(email, senha) {
   const resposta = await fetch(`${API_URL}/api/auth/cadastro`, {
     method: 'POST',
@@ -145,9 +124,6 @@ export async function cadastrar(email, senha) {
   return resposta.json();
 }
 
-/**
- * Autentica o usuário com e-mail e senha.
- */
 export async function login(email, senha) {
   const resposta = await fetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
@@ -163,9 +139,6 @@ export async function login(email, senha) {
   return resposta.json();
 }
 
-/**
- * Define o nickname de um usuário recém-cadastrado.
- */
 export async function definirNickname(usuarioId, nickname) {
   const resposta = await fetch(`${API_URL}/api/auth/nickname`, {
     method: 'POST',
@@ -181,9 +154,6 @@ export async function definirNickname(usuarioId, nickname) {
   return resposta.json();
 }
 
-/**
- * Busca o perfil do usuário, com a avaliação de risco mais recente e o histórico.
- */
 export async function buscarPerfil(usuarioId) {
   const resposta = await fetch(`${API_URL}/api/perfil/${usuarioId}`, { headers: HEADERS_PADRAO });
 

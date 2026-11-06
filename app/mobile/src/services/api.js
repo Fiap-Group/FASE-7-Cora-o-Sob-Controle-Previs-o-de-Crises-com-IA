@@ -12,7 +12,6 @@ const HEADERS_PADRAO = { 'X-Client-Platform': 'mobile', 'ngrok-skip-browser-warn
 
 let indexadoNestaSessao = false;
 
-/** Solicita ao backend que apague o índice do paciente, ignorando falhas de conexão. */
 export async function apagarIndiceNoBackend() {
   try {
     await fetch(`${API_URL}/api/reset`, { method: 'POST', headers: HEADERS_PADRAO });
@@ -21,12 +20,10 @@ export async function apagarIndiceNoBackend() {
   indexadoNestaSessao = false;
 }
 
-/** Extrai a mensagem de erro mais útil da resposta do backend. */
 function mensagemDeErro(corpoErro, mensagemPadrao) {
   return corpoErro.details || corpoErro.error || mensagemPadrao;
 }
 
-/** Indexa o relatório genômico do usuário no backend RAG. */
 export async function indexarRelatorio(perfilJson) {
   const resposta = await fetch(`${API_URL}/api/index`, {
     method: 'POST',
@@ -55,7 +52,6 @@ async function garantirIndexacao() {
   await indexarRelatorio(perfilSalvo);
 }
 
-/** Envia a pergunta ao endpoint de chat do backend. */
 async function chamarChat(pergunta) {
   return fetch(`${API_URL}/api/chat`, {
     method: 'POST',
@@ -89,7 +85,6 @@ export async function perguntarAoAgente(pergunta) {
   return resposta.json();
 }
 
-/** Envia os dados de operação hospitalar ao sistema multiagente e retorna a avaliação de risco cardíaco. */
 export async function avaliarRiscoCardiaco(dadosOperacao, usuarioId) {
   const resposta = await fetch(`${API_URL}/api/risco/avaliar`, {
     method: 'POST',
@@ -105,7 +100,6 @@ export async function avaliarRiscoCardiaco(dadosOperacao, usuarioId) {
   return resposta.json();
 }
 
-/** Busca a última leitura do sensor IoT guardada em memória pelo backend. */
 export async function buscarLeituraIot() {
   const resposta = await fetch(`${API_URL}/api/risco/leitura-iot`, { headers: HEADERS_PADRAO });
 
@@ -117,7 +111,6 @@ export async function buscarLeituraIot() {
   return resposta.json();
 }
 
-/** Cria uma nova conta de usuário no backend. */
 export async function cadastrar(email, senha) {
   const resposta = await fetch(`${API_URL}/api/auth/cadastro`, {
     method: 'POST',
@@ -133,7 +126,6 @@ export async function cadastrar(email, senha) {
   return resposta.json();
 }
 
-/** Autentica o usuário com e-mail e senha no backend. */
 export async function login(email, senha) {
   const resposta = await fetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
@@ -149,7 +141,6 @@ export async function login(email, senha) {
   return resposta.json();
 }
 
-/** Define o nickname do usuário no backend. */
 export async function definirNickname(usuarioId, nickname) {
   const resposta = await fetch(`${API_URL}/api/auth/nickname`, {
     method: 'POST',
@@ -165,7 +156,6 @@ export async function definirNickname(usuarioId, nickname) {
   return resposta.json();
 }
 
-/** Busca o perfil do usuário, incluindo a avaliação de risco mais recente e o histórico. */
 export async function buscarPerfil(usuarioId) {
   const resposta = await fetch(`${API_URL}/api/perfil/${usuarioId}`, { headers: HEADERS_PADRAO });
 

@@ -18,6 +18,5 @@ GLOSSARIO = {
 
 
 def glossario_para_prompt() -> str:
-    """Formata o glossário como lista de linhas para injetar no prompt do sistema."""
     linhas = [f'- "{termo}": {explicacao}' for termo, explicacao in GLOSSARIO.items()]
     return "\n".join(linhas)

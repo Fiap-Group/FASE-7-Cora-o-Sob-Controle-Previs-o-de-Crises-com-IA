@@ -54,13 +54,11 @@ export default function ProfileScreen({ navigation }) {
 
   const primeiraCarga = useRef(true);
   const contadorId = useRef(0);
-  /** Gera um id sequencial único para uma nova linha do formulário. */
   const novoId = (prefixo) => {
     contadorId.current += 1;
     return `${prefixo}-${contadorId.current}`;
   };
 
-  /** Preenche os campos do formulário a partir de um relatório genômico existente. */
   const preencherFormularioComPerfil = (dados) => {
     if (!dados) return;
     setPacienteNome(dados.paciente?.nome || '');
@@ -101,50 +99,41 @@ export default function ProfileScreen({ navigation }) {
     }, [carregarPerfil])
   );
 
-  /** Preenche o formulário com um relatório genômico de exemplo. */
   const handleUsarExemplo = () => {
     preencherFormularioComPerfil(relatorioGenomicoExemplo);
   };
 
-  /** Abre o formulário preenchido com o relatório atual, para edição. */
   const handleAbrirNovoRelatorio = () => {
     preencherFormularioComPerfil(perfil);
     setMostrarFormulario(true);
   };
 
-  /** Atualiza o valor de um campo em uma linha de ancestralidade do formulário. */
   const atualizarAncestralidadeLinha = (id, campo, valor) => {
     setAncestralidadeLinhas((atual) =>
       atual.map((linha) => (linha.id === id ? { ...linha, [campo]: valor } : linha))
     );
   };
 
-  /** Adiciona uma nova linha vazia de ancestralidade ao formulário. */
   const adicionarAncestralidadeLinha = () => {
     setAncestralidadeLinhas((atual) => [...atual, { id: novoId('anc'), origem: '', percentual: '' }]);
   };
 
-  /** Remove uma linha de ancestralidade do formulário. */
   const removerAncestralidadeLinha = (id) => {
     setAncestralidadeLinhas((atual) => atual.filter((linha) => linha.id !== id));
   };
 
-  /** Atualiza o valor de um campo em uma linha de risco do formulário. */
   const atualizarRiscoLinha = (id, campo, valor) => {
     setRiscosLinhas((atual) => atual.map((linha) => (linha.id === id ? { ...linha, [campo]: valor } : linha)));
   };
 
-  /** Adiciona uma nova linha vazia de risco ao formulário. */
   const adicionarRiscoLinha = () => {
     setRiscosLinhas((atual) => [...atual, { id: novoId('risco'), nome: '', nivel: 'moderado', descricao: '' }]);
   };
 
-  /** Remove uma linha de risco do formulário. */
   const removerRiscoLinha = (id) => {
     setRiscosLinhas((atual) => atual.filter((linha) => linha.id !== id));
   };
 
-  /** Monta e valida o relatório genômico a partir dos dados preenchidos no formulário. */
   const montarRelatorio = () => {
     const ancestralidadeValida = ancestralidadeLinhas
       .map((linha) => ({
@@ -177,7 +166,6 @@ export default function ProfileScreen({ navigation }) {
     };
   };
 
-  /** Valida o formulário e, após confirmar o consentimento quando necessário, envia o relatório. */
   const handleEnviar = async () => {
     if (!pacienteNome.trim()) {
       avisar('Nome obrigatório', 'Informe seu nome antes de enviar.');
@@ -207,7 +195,6 @@ export default function ProfileScreen({ navigation }) {
     );
   };
 
-  /** Indexa e salva o relatório, gera um novo resumo e navega até a conversa. */
   const enviarRelatorio = async (perfilMontado) => {
     setEnviando(true);
     try {
@@ -238,7 +225,6 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
-  /** Confirma e apaga todos os dados do usuário, no dispositivo e no índice do backend. */
   const handleApagarDados = () => {
     confirmarAcao(
       'Apagar meus dados',

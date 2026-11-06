@@ -29,11 +29,5 @@ export default function criarEstilos(colors) {
     marginBottom: 8,
     lineHeight: 18,
   },
-  recomendacao: {
-    fontSize: 13,
-    fontFamily: fonts.regular,
-    color: colors.textPrimary,
-    lineHeight: 19,
-  },
   });
 }

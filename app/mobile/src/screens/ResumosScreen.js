@@ -8,7 +8,6 @@ import { avisar, confirmarAcao } from '../utils/alerta';
 import { useTema } from '../theme/ThemeContext';
 import criarEstilos from '../styles/resumosScreenStyles';
 
-/** Tela de listagem dos resumos gerados, com opção de gerar um novo. */
 export default function ResumosScreen({ navigation }) {
   const { colors } = useTema();
   const styles = useMemo(() => criarEstilos(colors), [colors]);
@@ -16,7 +15,6 @@ export default function ResumosScreen({ navigation }) {
   const [carregando, setCarregando] = useState(true);
   const [gerando, setGerando] = useState(false);
 
-  /** Busca a lista de resumos salvos. */
   const carregarResumos = useCallback(async () => {
     const lista = await buscarResumos();
     setResumos(lista);
@@ -29,7 +27,6 @@ export default function ResumosScreen({ navigation }) {
     }, [carregarResumos])
   );
 
-  /** Gera um novo resumo e atualiza a lista exibida. */
   const handleGerarResumo = async () => {
     setGerando(true);
     try {
@@ -48,12 +45,10 @@ export default function ResumosScreen({ navigation }) {
     }
   };
 
-  /** Navega para a tela de conversa associada ao resumo selecionado. */
   const abrirResumo = (resumo) => {
     navigation.navigate('Chat', { sessaoId: resumo.sessao_id, resumoData: resumo.data_criacao });
   };
 
-  /** Confirma e executa a remoção de um resumo e sua conversa associada. */
   const handleRemover = (resumo) => {
     confirmarAcao(
       'Remover resumo',

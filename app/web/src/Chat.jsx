@@ -11,7 +11,6 @@ const NOMES_SECAO = {
   recomendacoes: 'Recomendações',
 };
 
-/** Formata uma data ISO em data e hora no padrão brasileiro. */
 function formatarDataHora(iso) {
   const data = new Date(iso);
   return (
@@ -21,9 +20,6 @@ function formatarDataHora(iso) {
   );
 }
 
-/**
- * Lista de resumos gerados e a conversa com o agente de IA sobre o relatório genômico.
- */
 export default function Chat({ sessaoInicialId }) {
   const [subview, setSubview] = useState(sessaoInicialId ? 'conversa' : 'lista');
   const [resumos, setResumos] = useState(() => buscarResumos());
@@ -40,20 +36,17 @@ export default function Chat({ sessaoInicialId }) {
     fimDaListaRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [mensagens]);
 
-  /** Abre a conversa de um resumo específico. */
   const abrirResumo = (resumo) => {
     setSessaoAtual(resumo.sessao_id);
     setMensagens(buscarMensagens(resumo.sessao_id));
     setSubview('conversa');
   };
 
-  /** Volta para a lista de resumos, recarregando-a. */
   const voltarParaLista = () => {
     setResumos(buscarResumos());
     setSubview('lista');
   };
 
-  /** Gera um novo resumo do perfil genômico e já abre a conversa correspondente. */
   const handleNovoResumo = async () => {
     setGerando(true);
     setErro('');
@@ -67,14 +60,12 @@ export default function Chat({ sessaoInicialId }) {
     }
   };
 
-  /** Confirma e remove um resumo e a conversa associada a ele. */
   const handleRemover = (resumo) => {
     if (!window.confirm('Isso vai apagar este resumo e toda a conversa associada a ele. Deseja continuar?')) return;
     deletarResumo(resumo.id, resumo.sessao_id);
     setResumos(buscarResumos());
   };
 
-  /** Envia a mensagem digitada ao agente e atualiza o histórico com a resposta. */
   const handleEnviar = async (evento) => {
     evento.preventDefault();
     const mensagemDigitada = texto.trim();

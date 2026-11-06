@@ -12,7 +12,6 @@ Base = declarative_base()
 
 
 def get_db() -> Generator[Session, None, None]:
-    """Fornece uma sessão do banco de dados e garante que ela seja fechada ao final."""
     db = SessionLocal()
     try:
         yield db

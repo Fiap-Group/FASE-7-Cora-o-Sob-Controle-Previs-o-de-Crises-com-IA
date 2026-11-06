@@ -32,8 +32,8 @@ def chunks_de(paciente: str, n: int) -> list[Chunk]:
         vetor = np.random.rand(8).astype(np.float32)
         vetor /= np.linalg.norm(vetor)
         saida.append(Chunk(
-            chunk_id=f"{paciente}-{i}", section="riscos_doencas", subsection=None,
-            text=f"Paciente {paciente} risco {i}", metadata={}, embedding=vetor,
+            section="riscos_doencas", subsection=None,
+            text=f"Paciente {paciente} risco {i}", embedding=vetor,
         ))
     return saida
 

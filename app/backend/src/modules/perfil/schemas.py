@@ -6,8 +6,6 @@ from src.modules.auth.schemas import UsuarioResponse
 
 
 class AvaliacaoResumo(BaseModel):
-    """Resumo de uma avaliação de risco concluída, no shape exposto pela API."""
-
     criado_em: datetime
     probabilidade: float
     classificacao: str
@@ -17,8 +15,6 @@ class AvaliacaoResumo(BaseModel):
 
 
 class PerfilResponse(BaseModel):
-    """Ficha de jogador do usuário: conta, avaliação mais recente e histórico."""
-
     usuario: UsuarioResponse
     avaliacao_mais_recente: AvaliacaoResumo | None
     historico: list[AvaliacaoResumo]

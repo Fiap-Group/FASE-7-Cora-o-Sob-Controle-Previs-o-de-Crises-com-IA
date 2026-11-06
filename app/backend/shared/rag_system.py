@@ -25,29 +25,22 @@ CAMPOS_IDENTIFICADORES = {"id", "nome", "data_nascimento", "cpf", "rg", "telefon
 
 @dataclass
 class Chunk:
-    """Unidade atômica de conhecimento extraída do JSON genômico."""
-    chunk_id: str
     section: str
     subsection: str | None
     text: str
-    metadata: dict[str, Any]
     embedding: np.ndarray | None = field(default=None, repr=False)
 
 
 @dataclass
 class RetrievedChunk:
-    """Chunk recuperado com seu score de similaridade."""
     chunk: Chunk
     score: float
 
 
 @dataclass
 class RAGResponse:
-    """Resposta final gerada pelo sistema RAG."""
-    question: str
     answer: str
     retrieved_chunks: list[RetrievedChunk]
-    context_used: str
     grounded: bool
 
 
@@ -62,12 +55,10 @@ class TextCleaner:
     ]
 
     def __init__(self):
-        """Compila as expressões regulares usadas para preservar termos genômicos."""
         combined = '|'.join(f'({p})' for p in self._PRESERVE_PATTERNS)
         self._preserve_re = re.compile(combined)
 
     def clean(self, text: str) -> str:
-        """Executa o pipeline completo de limpeza de um texto bruto."""
         if not text:
             return ""
 
@@ -83,7 +74,6 @@ class TextCleaner:
         return text
 
     def normalize_genetic_terms(self, text: str) -> str:
-        """Padroniza siglas e termos genéticos para manter consistência nos embeddings."""
         replacements = {
             r'\bSNP\b': 'variante genética',
             r'\bVUS\b': 'variante de significado incerto',
@@ -97,7 +87,6 @@ class TextCleaner:
         return text
 
     def clean_and_normalize(self, text: str) -> str:
-        """Aplica limpeza e normalização genética em sequência."""
         return self.normalize_genetic_terms(self.clean(text))
 
 
@@ -105,45 +94,30 @@ class GenomicChunker:
     """Divide o JSON genômico em chunks semanticamente coesos, por domínio."""
 
     def __init__(self, cleaner: TextCleaner):
-        """Guarda o limpador de texto usado para normalizar cada chunk gerado."""
         self.cleaner = cleaner
 
     def chunk_json(self, genomic_json: dict[str, Any]) -> list[Chunk]:
-        """Transforma o JSON genômico completo em uma lista de chunks prontos para embedding."""
         chunks: list[Chunk] = []
         patient_id = genomic_json.get("paciente", {}).get("id", "unknown")
 
-        chunks.extend(self._chunk_patient_profile(genomic_json, patient_id))
+        chunks.extend(self._chunk_patient_profile(genomic_json))
 
         if "ancestralidade" in genomic_json:
-            chunks.extend(
-                self._chunk_ancestry(genomic_json["ancestralidade"], patient_id)
-            )
+            chunks.extend(self._chunk_ancestry(genomic_json["ancestralidade"]))
 
         if "riscos_doencas" in genomic_json:
-            chunks.extend(
-                self._chunk_disease_risks(genomic_json["riscos_doencas"], patient_id)
-            )
+            chunks.extend(self._chunk_disease_risks(genomic_json["riscos_doencas"]))
 
         if "bem_estar" in genomic_json:
-            chunks.extend(
-                self._chunk_wellness(genomic_json["bem_estar"], patient_id)
-            )
+            chunks.extend(self._chunk_wellness(genomic_json["bem_estar"]))
 
         if "recomendacoes" in genomic_json:
-            chunks.extend(
-                self._chunk_recommendations(genomic_json["recomendacoes"], patient_id)
-            )
+            chunks.extend(self._chunk_recommendations(genomic_json["recomendacoes"]))
 
         logger.info(f"Chunking concluído: {len(chunks)} chunks gerados para paciente {patient_id}")
         return chunks
 
-    def _make_chunk_id(self, patient_id: str, section: str, index: int) -> str:
-        """Monta o identificador único de um chunk a partir do paciente, da seção e do índice."""
-        return f"{patient_id}_{section}_{index:03d}"
-
-    def _chunk_patient_profile(self, data: dict[str, Any], patient_id: str) -> list[Chunk]:
-        """Extrai o perfil básico do paciente como chunk de contexto global."""
+    def _chunk_patient_profile(self, data: dict[str, Any]) -> list[Chunk]:
         patient = data.get("paciente", {})
         if not patient:
             return []
@@ -157,15 +131,12 @@ class GenomicChunker:
 
         text = self.cleaner.clean_and_normalize("\n".join(parts))
         return [Chunk(
-            chunk_id=self._make_chunk_id(patient_id, "perfil", 0),
             section="perfil",
             subsection="dados_basicos",
             text=text,
-            metadata=patient,
         )]
 
-    def _chunk_ancestry(self, ancestry_data: Any, patient_id: str) -> list[Chunk]:
-        """Cria um chunk independente para cada origem geográfica de ancestralidade."""
+    def _chunk_ancestry(self, ancestry_data: Any) -> list[Chunk]:
         chunks: list[Chunk] = []
 
         items: list[Any]
@@ -195,17 +166,14 @@ class GenomicChunker:
 
             text = self.cleaner.clean_and_normalize(" ".join(parts))
             chunks.append(Chunk(
-                chunk_id=self._make_chunk_id(patient_id, "ancestralidade", i),
                 section="ancestralidade",
                 subsection=str(origin).lower().replace(" ", "_"),
                 text=text,
-                metadata=item,
             ))
 
         return chunks
 
-    def _chunk_disease_risks(self, risks_data: Any, patient_id: str) -> list[Chunk]:
-        """Cria um chunk por doença, com risco, variantes e contexto clínico."""
+    def _chunk_disease_risks(self, risks_data: Any) -> list[Chunk]:
         chunks: list[Chunk] = []
 
         items: list[Any]
@@ -251,19 +219,15 @@ class GenomicChunker:
 
             text = self.cleaner.clean_and_normalize(" ".join(parts))
             chunks.append(Chunk(
-                chunk_id=self._make_chunk_id(patient_id, "risco_doenca", i),
                 section="riscos_doencas",
                 subsection=str(name).lower().replace(" ", "_"),
                 text=text,
-                metadata=disease_d,
             ))
 
         return chunks
 
-    def _chunk_wellness(self, wellness_data: dict[str, Any], patient_id: str) -> list[Chunk]:
-        """Processa dados de bem-estar, nutrição e farmacogenômica, agrupados por subcategoria."""
+    def _chunk_wellness(self, wellness_data: dict[str, Any]) -> list[Chunk]:
         chunks: list[Chunk] = []
-        idx = 0
 
         for category, items in wellness_data.items():
             if not items:
@@ -294,18 +258,14 @@ class GenomicChunker:
 
                 text = self.cleaner.clean_and_normalize(" ".join(parts))
                 chunks.append(Chunk(
-                    chunk_id=self._make_chunk_id(patient_id, "bem_estar", idx),
                     section="bem_estar",
                     subsection=str(category).lower().replace(" ", "_"),
                     text=text,
-                    metadata=item_dict,
                 ))
-                idx += 1
 
         return chunks
 
-    def _chunk_recommendations(self, recs_data: Any, patient_id: str) -> list[Chunk]:
-        """Consolida recomendações clínicas em chunks acionáveis."""
+    def _chunk_recommendations(self, recs_data: Any) -> list[Chunk]:
         chunks: list[Chunk] = []
 
         items: list[tuple[str, Any]]
@@ -318,7 +278,7 @@ class GenomicChunker:
         else:
             return []
 
-        for i, (key, rec) in enumerate(items):
+        for key, rec in items:
             if isinstance(rec, dict):
                 rec_dict: dict[str, Any] = cast(dict[str, Any], rec)
                 category = rec_dict.get("categoria", key)
@@ -336,11 +296,9 @@ class GenomicChunker:
 
             text = self.cleaner.clean_and_normalize(" ".join(parts))
             chunks.append(Chunk(
-                chunk_id=self._make_chunk_id(patient_id, "recomendacao", i),
                 section="recomendacoes",
                 subsection=str(key).lower(),
                 text=text,
-                metadata={"key": key, "content": rec},
             ))
 
         return chunks
@@ -350,7 +308,6 @@ class EmbeddingEngine:
     """Gera embeddings vetoriais de texto, via sentence-transformers local ou API OpenAI."""
 
     def __init__(self, backend: str = "sentence_transformers", model_name: str | None = None):
-        """Inicializa o backend de embeddings escolhido e carrega o modelo correspondente."""
         self.backend = backend
         self._model: Any = None
 
@@ -364,7 +321,6 @@ class EmbeddingEngine:
             raise ValueError(f"Backend '{backend}' não suportado. Use 'sentence_transformers' ou 'openai'.")
 
     def _init_sentence_transformers(self):
-        """Carrega o modelo local do sentence-transformers."""
         try:
             from sentence_transformers import SentenceTransformer
             logger.info(f"Carregando modelo SentenceTransformer: {self.model_name}")
@@ -377,7 +333,6 @@ class EmbeddingEngine:
             )
 
     def _init_openai(self):
-        """Inicializa o cliente da API da OpenAI para geração de embeddings."""
         try:
             from openai import OpenAI
             import os
@@ -390,7 +345,6 @@ class EmbeddingEngine:
             raise ImportError("Instale o pacote: pip install openai")
 
     def embed(self, texts: list[str]) -> np.ndarray:
-        """Gera os embeddings de uma lista de textos, usando o backend configurado."""
         if not texts:
             return np.array([])
 
@@ -401,7 +355,6 @@ class EmbeddingEngine:
         raise ValueError(f"Backend de embeddings desconhecido: {self.backend}")
 
     def _embed_sentence_transformers(self, texts: list[str]) -> np.ndarray:
-        """Gera embeddings normalizados usando o modelo local do sentence-transformers."""
         embeddings = self._model.encode(
             texts,
             batch_size=32,
@@ -411,7 +364,6 @@ class EmbeddingEngine:
         return np.array(embeddings, dtype=np.float32)
 
     def _embed_openai(self, texts: list[str]) -> np.ndarray:
-        """Gera embeddings via API da OpenAI, com batching automático."""
         BATCH_SIZE = 100
         all_embeddings: list[Any] = []
 
@@ -432,9 +384,7 @@ class EmbeddingEngine:
 class VectorStore:
     """Base vetorial em memória, com busca por similaridade de cosseno via FAISS ou NumPy."""
 
-    def __init__(self, embedding_dim: int | None = None, use_faiss: bool = True):
-        """Inicializa o índice vetorial, usando FAISS quando disponível."""
-        self.embedding_dim = embedding_dim
+    def __init__(self, use_faiss: bool = True):
         self.chunks: list[Chunk] = []
         self._index: Any = None
         self._use_faiss = use_faiss and self._faiss_available()
@@ -446,7 +396,6 @@ class VectorStore:
 
     @staticmethod
     def _faiss_available() -> bool:
-        """Verifica se o pacote FAISS está instalado e disponível para uso."""
         if importlib.util.find_spec("faiss") is not None:
             return True
         logger.warning("FAISS não disponível. Usando NumPy para busca vetorial.")
@@ -458,7 +407,6 @@ class VectorStore:
         self._index: Any = None
 
     def add_chunks(self, chunks: list[Chunk]):
-        """Adiciona ao índice os chunks que já têm embedding preenchido."""
         valid = [c for c in chunks if c.embedding is not None]
         if not valid:
             logger.warning("Nenhum chunk com embedding para adicionar.")
@@ -472,7 +420,6 @@ class VectorStore:
         logger.info(f"VectorStore: {len(valid)} chunks adicionados. Total: {len(self.chunks)}")
 
     def _add_faiss(self, chunks: list[Chunk]):
-        """Adiciona os embeddings dos chunks ao índice FAISS."""
         import faiss
         vectors = np.vstack(cast(list[np.ndarray], [c.embedding for c in chunks])).astype(np.float32)
 
@@ -483,7 +430,6 @@ class VectorStore:
         self._index.add(vectors)
 
     def search(self, query_embedding: np.ndarray, top_k: int = 5) -> list[RetrievedChunk]:
-        """Busca os chunks mais similares ao embedding de uma pergunta."""
         if not self.chunks:
             logger.warning("VectorStore vazio. Nenhum chunk para buscar.")
             return []
@@ -502,7 +448,6 @@ class VectorStore:
             return self._search_numpy(query, top_k)
 
     def _search_faiss(self, query: np.ndarray, top_k: int) -> list[RetrievedChunk]:
-        """Busca os chunks mais similares usando o índice FAISS."""
         k = min(top_k, len(self.chunks))
         scores, indices = self._index.search(query, k)
 
@@ -538,14 +483,12 @@ class Retriever:
         top_k: int = 5,
         min_score: float = 0.25,
     ):
-        """Guarda as dependências e os parâmetros usados na recuperação de chunks."""
         self.vector_store = vector_store
         self.embedding_engine = embedding_engine
         self.top_k = top_k
         self.min_score = min_score
 
     def retrieve(self, question: str) -> list[RetrievedChunk]:
-        """Recupera os chunks mais relevantes para a pergunta, filtrados por score mínimo."""
         logger.info(f"Retrieval para: '{question[:80]}...'")
 
         query_embedding = self.embedding_engine.embed([question])[0]
@@ -565,7 +508,6 @@ class Retriever:
         return filtered
 
     def build_context(self, retrieved: list[RetrievedChunk]) -> str:
-        """Monta o contexto estruturado que será injetado no prompt do LLM."""
         if not retrieved:
             return "Nenhuma informação relevante encontrada no perfil genômico."
 
@@ -588,7 +530,6 @@ class LLMGenerator:
     SYSTEM_PROMPT = SYSTEM_PROMPT_RAG
 
     def __init__(self, backend: str = "openai", model_name: str | None = None, temperature: float = 0.1):
-        """Inicializa o cliente do backend de LLM escolhido."""
         self.backend = backend
         self.temperature = temperature
         self._client: Any = None
@@ -606,7 +547,6 @@ class LLMGenerator:
             raise ValueError(f"Backend '{backend}' não suportado.")
 
     def _init_openai(self):
-        """Inicializa o cliente da API da OpenAI."""
         try:
             from openai import OpenAI
             import os
@@ -615,7 +555,6 @@ class LLMGenerator:
             raise ImportError("pip install openai")
 
     def _init_anthropic(self):
-        """Inicializa o cliente da API da Anthropic."""
         try:
             import anthropic
             import os
@@ -694,7 +633,6 @@ class LLMGenerator:
         return any(marcador in texto for marcador in ("503", "unavailable", "overloaded"))
 
     def _generate_openai(self, user_message: str) -> str:
-        """Gera a resposta usando a API de chat da OpenAI."""
         response = self._client.chat.completions.create(
             model=self.model_name,
             messages=[
@@ -707,7 +645,6 @@ class LLMGenerator:
         return response.choices[0].message.content.strip()
 
     def _generate_anthropic(self, user_message: str) -> str:
-        """Gera a resposta usando a API de mensagens da Anthropic."""
         response = self._client.messages.create(
             model=self.model_name,
             max_tokens=600,
@@ -718,7 +655,6 @@ class LLMGenerator:
         return response.content[0].text.strip()
 
     def _generate_gemini(self, user_message: str) -> str:
-        """Gera a resposta usando a API do Gemini."""
         from google.genai import types
 
         response = self._client.models.generate_content(
@@ -746,7 +682,6 @@ class GenomicRAGPipeline:
         retriever: Retriever,
         generator: LLMGenerator,
     ):
-        """Guarda os componentes já construídos do pipeline."""
         self.cleaner = cleaner
         self.chunker = chunker
         self.embedding_engine = embedding_engine
@@ -757,7 +692,6 @@ class GenomicRAGPipeline:
 
     @classmethod
     def from_config(cls, config: dict[str, Any]) -> "GenomicRAGPipeline":
-        """Monta o pipeline completo a partir de um dicionário de configuração."""
         cleaner = TextCleaner()
         chunker = GenomicChunker(cleaner)
 
@@ -813,7 +747,6 @@ class GenomicRAGPipeline:
         self._indexed = False
 
     def answer(self, question: str) -> RAGResponse:
-        """Responde a uma pergunta do paciente usando o pipeline RAG completo."""
         if not self._indexed:
             raise RuntimeError("Nenhum perfil genômico indexado. Execute index_patient() primeiro.")
 
@@ -829,10 +762,8 @@ class GenomicRAGPipeline:
         answer_text_final = answer_text + DISCLAIMER_RESPOSTA
 
         return RAGResponse(
-            question=question,
             answer=answer_text_final,
             retrieved_chunks=retrieved_chunks,
-            context_used=context,
             grounded=grounded,
         )
 

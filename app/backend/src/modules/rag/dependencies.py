@@ -37,10 +37,7 @@ def get_pipeline_if_exists() -> GenomicRAGPipeline | None:
 
 
 class EstadoIndexacao:
-    """Guarda se já há um perfil genômico indexado na memória do backend."""
-
     def __init__(self) -> None:
-        """Inicializa o estado como não indexado."""
         self.indexado = False
 
 
@@ -48,5 +45,4 @@ _estado = EstadoIndexacao()
 
 
 def get_estado() -> EstadoIndexacao:
-    """Devolve a instância compartilhada do estado de indexação."""
     return _estado

@@ -7,8 +7,6 @@ from shared.preditivo.protocolos import PROTOCOLOS
 
 
 class PacienteInput(BaseModel):
-    """Dados de entrada de um paciente usados pelo fluxo de agentes."""
-
     idade_media: float
     carga_sistema: float
     tempo_espera: float
@@ -26,21 +24,15 @@ class PacienteInput(BaseModel):
 
 
 class AnaliseRisco(BaseModel):
-    """Resultado da análise de risco cardíaco de um paciente."""
-
     probabilidade: float
     classificacao: Literal["Alto risco", "Baixo risco"]
 
 
 class ProtocolosResultado(BaseModel):
-    """Lista de protocolos aplicáveis a um paciente."""
-
     protocolos: list[str]
 
 
 class RecomendacaoFinal(BaseModel):
-    """Recomendação final consolidada pelo fluxo multiagente."""
-
     probabilidade: float
     classificacao: Literal["Alto risco", "Baixo risco"]
     protocolos: list[str]

@@ -19,13 +19,11 @@ router = APIRouter(prefix="/api", tags=["rag"])
 
 
 def erro_interno(contexto: str, excecao: Exception, status: int = 500) -> HTTPException:
-    """Loga o erro e devolve a exceção HTTP padronizada do módulo."""
     return _erro_interno_compartilhado(logger, contexto, excecao, status)
 
 
 @router.get("/health", response_model=HealthResponse)
 def health(estado: EstadoIndexacao = Depends(get_estado)) -> HealthResponse:
-    """Informa o status da API, se há um relatório indexado e qual LLM está em uso."""
     llm = os.getenv("LLM_BACKEND") or ("gemini" if os.getenv("GEMINI_API_KEY") else "não configurado")
     return HealthResponse(
         status="ok",
@@ -37,7 +35,6 @@ def health(estado: EstadoIndexacao = Depends(get_estado)) -> HealthResponse:
 
 @router.get("/metrics")
 def metrics() -> dict[str, Any]:
-    """Devolve os contadores e latências acumulados desde o último start."""
     return metricas.resumo()
 
 
@@ -47,7 +44,6 @@ def index_patient(
     estado: EstadoIndexacao = Depends(get_estado),
     pipeline: GenomicRAGPipeline = Depends(get_pipeline),
 ) -> IndexResponse:
-    """Recebe o JSON genômico do paciente e substitui o índice atual."""
     if not genomic_json:
         raise HTTPException(status_code=400, detail="JSON do perfil genômico é obrigatório")
 
@@ -68,7 +64,6 @@ def chat(
     estado: EstadoIndexacao = Depends(get_estado),
     pipeline: GenomicRAGPipeline = Depends(get_pipeline),
 ) -> ChatResponse:
-    """Responde uma pergunta do paciente usando o pipeline RAG (retrieval + LLM)."""
     if not estado.indexado:
         raise HTTPException(status_code=400, detail="Nenhum perfil genômico indexado. Chame /api/index primeiro.")
 

@@ -14,7 +14,6 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 @router.post("/cadastro", response_model=UsuarioResponse, status_code=201)
 def cadastro(body: CadastroRequest, db: Session = Depends(get_db)) -> UsuarioResponse:
-    """Cria uma nova conta de usuário a partir de e-mail e senha."""
     try:
         usuario = service.criar_usuario(db, body.email, body.senha)
     except service.EmailInvalido as e:
@@ -28,7 +27,6 @@ def cadastro(body: CadastroRequest, db: Session = Depends(get_db)) -> UsuarioRes
 
 @router.post("/login", response_model=UsuarioResponse)
 def login(body: LoginRequest, db: Session = Depends(get_db)) -> UsuarioResponse:
-    """Autentica o usuário pelo e-mail e senha e devolve seus dados."""
     usuario = service.autenticar(db, body.email, body.senha)
     if not usuario:
         raise HTTPException(status_code=401, detail="E-mail ou senha inválidos")
@@ -38,7 +36,6 @@ def login(body: LoginRequest, db: Session = Depends(get_db)) -> UsuarioResponse:
 
 @router.post("/nickname", response_model=UsuarioResponse)
 def nickname(body: NicknameRequest, db: Session = Depends(get_db)) -> UsuarioResponse:
-    """Define o nickname de uma conta já criada."""
     usuario = service.definir_nickname(db, body.usuario_id, body.nickname)
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")

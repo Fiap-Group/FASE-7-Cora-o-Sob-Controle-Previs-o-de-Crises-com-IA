@@ -11,7 +11,6 @@ import criarEstilos from '../styles/ancestralidadeScreenStyles';
 const VALORES_INICIAIS = Object.fromEntries(RISCO_CARDIACO_FEATURES.map((f) => [f.chave, '']));
 const VALORES_EXEMPLO = Object.fromEntries(RISCO_CARDIACO_FEATURES.map((f) => [f.chave, String(f.exemplo)]));
 
-/** Tela de formulário para informar métricas e solicitar a avaliação de risco cardíaco. */
 export default function PrevisaoFormScreen({ navigation }) {
   const { usuario } = useAuth();
   const { colors } = useTema();
@@ -20,17 +19,14 @@ export default function PrevisaoFormScreen({ navigation }) {
   const [enviando, setEnviando] = useState(false);
   const [buscandoIot, setBuscandoIot] = useState(false);
 
-  /** Atualiza o valor digitado para um campo do formulário. */
   const atualizarCampo = (chave, texto) => {
     setValores((atual) => ({ ...atual, [chave]: texto }));
   };
 
-  /** Preenche o formulário com valores de exemplo. */
   const handleUsarExemplo = () => {
     setValores(VALORES_EXEMPLO);
   };
 
-  /** Busca a leitura atual do sensor IoT e preenche os campos correspondentes do formulário. */
   const handleUsarLeituraIot = async () => {
     setBuscandoIot(true);
     try {
@@ -59,7 +55,6 @@ export default function PrevisaoFormScreen({ navigation }) {
     }
   };
 
-  /** Valida e monta o payload numérico do formulário para envio à avaliação de risco. */
   const montarPayload = () => {
     const payload = {};
     for (const { chave, label } of RISCO_CARDIACO_FEATURES) {
@@ -73,7 +68,6 @@ export default function PrevisaoFormScreen({ navigation }) {
     return payload;
   };
 
-  /** Monta o payload, solicita a avaliação de risco e navega para o resultado. */
   const handleAvaliar = async () => {
     const payload = montarPayload();
     if (!payload) return;

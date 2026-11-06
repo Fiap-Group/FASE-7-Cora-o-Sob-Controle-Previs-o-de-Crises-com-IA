@@ -28,7 +28,6 @@ class RedeRiscoCardiaco(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Calcula o logit de pico de risco para o lote de entrada `x`."""
         return self.camadas(x)
 
 
@@ -93,7 +92,6 @@ def salvar_modelo(
     scaler_scale: np.ndarray,
     caminho: Path = CAMINHO_MODELO,
 ) -> None:
-    """Salva os pesos do modelo e os parâmetros de normalização em disco."""
     torch.save(
         {
             "state_dict": modelo.state_dict(),
@@ -106,7 +104,6 @@ def salvar_modelo(
 
 
 def carregar_modelo(caminho: Path = CAMINHO_MODELO) -> dict[str, Any]:
-    """Carrega o modelo treinado e seus parâmetros de normalização a partir do checkpoint salvo."""
     if not caminho.exists():
         raise FileNotFoundError(
             f"Modelo não encontrado em {caminho}. Rode "

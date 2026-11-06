@@ -19,9 +19,6 @@ const NIVEL_POR_CLASSIFICACAO = {
   'Baixo risco': 'baixo',
 };
 
-/**
- * Dashboard principal: avalia o risco cardíaco a partir das métricas informadas e exibe o perfil do usuário.
- */
 export default function Dashboard({ usuario, onSair, tema, onAlternarTema }) {
   const [aba, setAba] = useState('avaliar');
   const [valores, setValores] = useState(VALORES_INICIAIS);
@@ -30,22 +27,13 @@ export default function Dashboard({ usuario, onSair, tema, onAlternarTema }) {
   const [avaliando, setAvaliando] = useState(false);
   const [buscandoIot, setBuscandoIot] = useState(false);
 
-  /**
-   * Atualiza o valor digitado em um campo do formulário.
-   */
   const atualizarCampo = (chave, texto) => {
     setValores((atual) => ({ ...atual, [chave]: texto }));
     setErro('');
   };
 
-  /**
-   * Preenche o formulário com os valores de exemplo.
-   */
   const handleUsarExemplo = () => setValores(VALORES_EXEMPLO);
 
-  /**
-   * Busca a leitura do sensor IoT e preenche as métricas vitais no formulário.
-   */
   const handleUsarLeituraIot = async () => {
     setBuscandoIot(true);
     setErro('');
@@ -72,9 +60,6 @@ export default function Dashboard({ usuario, onSair, tema, onAlternarTema }) {
     }
   };
 
-  /**
-   * Valida e converte os valores do formulário em um payload numérico para a avaliação.
-   */
   const montarPayload = () => {
     const payload = {};
     for (const { chave, label } of RISCO_CARDIACO_FEATURES) {
@@ -88,9 +73,6 @@ export default function Dashboard({ usuario, onSair, tema, onAlternarTema }) {
     return payload;
   };
 
-  /**
-   * Envia o payload para avaliação do risco cardíaco e exibe o resultado.
-   */
   const handleAvaliar = async (evento) => {
     evento.preventDefault();
     setErro('');

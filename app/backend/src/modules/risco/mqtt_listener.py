@@ -18,8 +18,6 @@ MQTT_ULTIMA_LEITURA = Gauge("mqtt_ultima_leitura_timestamp", "Timestamp Unix da 
 
 @dataclass
 class LeituraIot:
-    """Última leitura de sinais vitais recebida do ESP32 via MQTT."""
-
     conectado: bool = False
     fc_media: float | None = None
     pa_sistolica: float | None = None
@@ -31,14 +29,12 @@ _leitura = LeituraIot()
 
 
 def get_leitura_iot() -> LeituraIot:
-    """Devolve a instância compartilhada com a última leitura do ESP32."""
     return _leitura
 
 
 def _ao_conectar(
     client: mqtt.Client, _userdata: object, _connect_flags: object, codigo_motivo: object, _properties: object
 ) -> None:
-    """Assina o tópico MQTT do ESP32 ao conectar com sucesso no broker."""
     topico = os.getenv("MQTT_TOPIC", "esp32/cardio/data")
     if codigo_motivo == 0:
         _leitura.conectado = True
@@ -50,12 +46,10 @@ def _ao_conectar(
 
 
 def _ao_desconectar(_client: mqtt.Client, _userdata: object, *_args: object) -> None:
-    """Marca a leitura como desconectada do broker MQTT."""
     _leitura.conectado = False
 
 
 def _ao_receber_mensagem(_client: mqtt.Client, _userdata: object, msg: mqtt.MQTTMessage) -> None:
-    """Atualiza a última leitura de sinais vitais a partir da mensagem MQTT recebida."""
     try:
         dados = json.loads(msg.payload)
         _leitura.fc_media = float(dados["fc_media"])

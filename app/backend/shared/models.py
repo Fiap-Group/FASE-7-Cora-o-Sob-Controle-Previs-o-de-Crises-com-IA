@@ -8,8 +8,6 @@ from .db import Base
 
 
 class Usuario(Base):
-    """Conta de usuário persistida no banco."""
-
     __tablename__ = "usuarios"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -20,8 +18,6 @@ class Usuario(Base):
 
 
 class HistoricoRisco(Base):
-    """Uma avaliação de risco concluída por um usuário, usada como fonte do perfil gamificado."""
-
     __tablename__ = "historico_risco"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

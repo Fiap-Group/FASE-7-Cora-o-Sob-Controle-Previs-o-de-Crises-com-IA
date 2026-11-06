@@ -6,7 +6,6 @@ from shared.agentes.tools import ferramenta_buscar_protocolos, ferramenta_prever
 
 
 def construir_todos_os_agentes() -> dict[str, Agent]:
-    """Monta os 4 agentes do fluxo multiagente e devolve todos eles, nomeados."""
     modelo = obter_modelo_gemini()
 
     planejador_resposta = Agent(

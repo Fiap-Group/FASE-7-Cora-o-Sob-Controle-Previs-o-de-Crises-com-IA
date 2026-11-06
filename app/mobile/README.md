@@ -46,9 +46,9 @@ emulador Android). Pra apontar pra outro backend, defina
 
 ## Gerar o `.apk` (EAS Build — publicado)
 
-**Download direto:** https://expo.dev/artifacts/eas/FKk1dMZxV-uv-3azakHxs7ENUqQyzXadmVXr4h0H0FA.apk
+**Download direto:** https://expo.dev/artifacts/eas/b2WWbMLX0PBgg02x2llJ0ZgWl-_Wcosrzd5SJqXA4do.apk
 
-**Build no dashboard:** https://expo.dev/accounts/jonny_1/projects/cardioia/builds/d125f74e-d39c-469e-9fe4-f90142a1aba8
+**Build no dashboard:** https://expo.dev/accounts/jonny_1/projects/cardioia/builds/d16c7193-34cd-4ee7-9aaf-40524c311894
 
 ```bash
 npx eas-cli login

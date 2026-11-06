@@ -6,8 +6,6 @@ from shared.agentes.schemas import PacienteInput
 
 
 class LeituraIotResponse(BaseModel):
-    """Última leitura de sinais vitais recebida do ESP32, no shape da API."""
-
     conectado: bool
     fc_media: float | None
     pa_sistolica: float | None
@@ -16,6 +14,4 @@ class LeituraIotResponse(BaseModel):
 
 
 class AvaliarRiscoRequest(PacienteInput):
-    """Dados de entrada para avaliar o risco cardíaco, com o usuário opcionalmente identificado."""
-
     usuario_id: int | None = None

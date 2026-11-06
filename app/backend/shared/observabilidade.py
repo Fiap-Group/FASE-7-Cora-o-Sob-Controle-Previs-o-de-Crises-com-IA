@@ -41,7 +41,6 @@ class FormatadorJSON(logging.Formatter):
     """Formata cada registro de log como uma linha JSON."""
 
     def format(self, record: logging.LogRecord) -> str:
-        """Converte um registro de log em uma string JSON com os campos relevantes."""
         evento: dict[str, object] = {
             "ts": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(record.created)),
             "nivel": record.levelname,
@@ -57,7 +56,6 @@ class FormatadorJSON(logging.Formatter):
 
 
 def configurar_logs():
-    """Configura o logger raiz com handlers de arquivo (com rotação) e console, em JSON."""
     os.makedirs(PASTA_LOGS, exist_ok=True)
     raiz = logging.getLogger()
     raiz.setLevel(logging.INFO)
@@ -81,7 +79,6 @@ class Metricas:
     """Contadores e latências em memória, reiniciados sempre que o backend sobe."""
 
     def __init__(self, tamanho_janela: int = 500):
-        """Inicializa os contadores e a janela de latências."""
         self._lock = threading.Lock()
         self.iniciado_em = time.time()
         self.contadores: dict[str, int] = {
@@ -101,22 +98,18 @@ class Metricas:
         EVENTOS_RAG.labels(tipo=nome).inc()
 
     def registrar_latencia(self, ms: float):
-        """Adiciona uma nova amostra de latência à janela."""
         with self._lock:
             self.latencias_ms.append(ms)
 
     def registrar_erro(self, mensagem: str):
-        """Guarda o último erro ocorrido, com data e mensagem."""
         with self._lock:
             self.ultimo_erro = {"em": time.strftime("%Y-%m-%dT%H:%M:%S"), "mensagem": mensagem}
 
     def resumo(self) -> dict[str, Any]:
-        """Monta um resumo atual das métricas: uptime, contadores e percentis de latência."""
         with self._lock:
             ordenadas: list[float] = sorted(self.latencias_ms)
 
             def percentil(p: float) -> float | None:
-                """Calcula o percentil `p` das latências ordenadas."""
                 if not ordenadas:
                     return None
                 return round(ordenadas[min(len(ordenadas) - 1, int(p * len(ordenadas)))], 1)
@@ -139,8 +132,8 @@ def configurar_telemetria(app: FastAPI) -> None:
 
     Sem efeito se OTEL_EXPORTER_OTLP_ENDPOINT não estiver configurado (ex: rodando
     testes ou fora do docker-compose) — o backend funciona normalmente sem tracing.
-    Idempotente: src/main.py é importado duas vezes no mesmo processo (ver nota
-    acima), então sem essa trava o FastAPI seria instrumentado duas vezes.
+    Idempotente: src/main.py é importado duas vezes no mesmo processo, então sem
+    essa trava o FastAPI seria instrumentado duas vezes.
     """
     global _telemetria_ok
     if _telemetria_ok:

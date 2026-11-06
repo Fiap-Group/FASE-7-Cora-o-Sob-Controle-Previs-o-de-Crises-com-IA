@@ -14,7 +14,6 @@ function getDatabase() {
   return dbPromise;
 }
 
-/** Cria as tabelas do banco local, caso ainda não existam. */
 export async function initDatabase() {
   const db = await getDatabase();
   await db.execAsync(`
@@ -77,14 +76,12 @@ export async function initDatabase() {
   `);
 }
 
-/** Busca o valor salvo de uma configuração (ex.: tema), ou null se nunca foi definida. */
 export async function obterConfiguracao(chave) {
   const db = await getDatabase();
   const linha = await db.getFirstAsync('SELECT valor FROM configuracoes WHERE chave = ?', [chave]);
   return linha ? linha.valor : null;
 }
 
-/** Salva (ou atualiza) o valor de uma configuração. */
 export async function salvarConfiguracao(chave, valor) {
   const db = await getDatabase();
   await db.runAsync(
@@ -94,7 +91,6 @@ export async function salvarConfiguracao(chave, valor) {
   );
 }
 
-/** Salva localmente qual usuário está logado neste aparelho. */
 export async function definirSessao(usuario) {
   const db = await getDatabase();
   await db.runAsync(
@@ -104,33 +100,28 @@ export async function definirSessao(usuario) {
   );
 }
 
-/** Encerra a sessão do usuário logado neste aparelho. */
 export async function encerrarSessao() {
   const db = await getDatabase();
   await db.runAsync('DELETE FROM sessao_atual WHERE id = 1');
 }
 
-/** Retorna o usuário com sessão ativa neste aparelho, ou null se não houver. */
 export async function obterUsuarioLogado() {
   const db = await getDatabase();
   const linha = await db.getFirstAsync('SELECT usuario_id, email, nickname FROM sessao_atual WHERE id = 1');
   return linha ? { id: linha.usuario_id, email: linha.email, nickname: linha.nickname } : null;
 }
 
-/** Verifica se o usuário já registrou o consentimento de uso dos dados. */
 export async function temConsentimento() {
   const db = await getDatabase();
   const linha = await db.getFirstAsync('SELECT id FROM consentimento LIMIT 1');
   return !!linha;
 }
 
-/** Registra o aceite do consentimento de uso dos dados. */
 export async function registrarConsentimento() {
   const db = await getDatabase();
   await db.runAsync('INSERT INTO consentimento (aceito_em) VALUES (?)', [new Date().toISOString()]);
 }
 
-/** Remove do dispositivo todos os registros pessoais e o consentimento. */
 export async function apagarTodosOsDados() {
   const db = await getDatabase();
   await db.withTransactionAsync(async () => {
@@ -143,7 +134,6 @@ export async function apagarTodosOsDados() {
   });
 }
 
-/** Salva uma mensagem na sessão de chat informada. */
 export async function salvarMensagem(sessaoId, autor, texto) {
   const db = await getDatabase();
   await db.runAsync(
@@ -152,7 +142,6 @@ export async function salvarMensagem(sessaoId, autor, texto) {
   );
 }
 
-/** Busca todas as mensagens de uma sessão de chat, em ordem cronológica. */
 export async function buscarMensagens(sessaoId) {
   const db = await getDatabase();
   return db.getAllAsync(
@@ -161,7 +150,6 @@ export async function buscarMensagens(sessaoId) {
   );
 }
 
-/** Cria um novo resumo em uma sessão de chat própria, já com o conteúdo como primeira mensagem. */
 export async function criarResumo(conteudo) {
   const db = await getDatabase();
   const agora = new Date().toISOString();
@@ -182,7 +170,6 @@ export async function criarResumo(conteudo) {
   return { id: resumo.lastInsertRowId, data_criacao: agora, conteudo, sessao_id: sessaoId };
 }
 
-/** Busca todos os resumos salvos, do mais recente para o mais antigo. */
 export async function buscarResumos() {
   const db = await getDatabase();
   return db.getAllAsync(
@@ -190,7 +177,6 @@ export async function buscarResumos() {
   );
 }
 
-/** Remove um resumo e toda a conversa associada a ele. */
 export async function deletarResumo(resumoId, sessaoId) {
   const db = await getDatabase();
   await db.withTransactionAsync(async () => {
@@ -200,7 +186,6 @@ export async function deletarResumo(resumoId, sessaoId) {
   });
 }
 
-/** Salva um novo perfil genômico do usuário. */
 export async function salvarPerfilGenomico(objetoJson) {
   const db = await getDatabase();
   const agora = new Date().toISOString();
@@ -211,7 +196,6 @@ export async function salvarPerfilGenomico(objetoJson) {
   return { id: resultado.lastInsertRowId, criado_em: agora };
 }
 
-/** Busca o perfil genômico mais recente salvo pelo usuário. */
 export async function buscarPerfilGenomicoAtual() {
   const db = await getDatabase();
   const linha = await db.getFirstAsync(
@@ -220,7 +204,6 @@ export async function buscarPerfilGenomicoAtual() {
   return linha ? JSON.parse(linha.dados_json) : null;
 }
 
-/** Salva o payload enviado e o resultado completo de uma avaliação de risco cardíaco. */
 export async function criarAvaliacaoRisco(dadosOperacao, resultado) {
   const db = await getDatabase();
   const agora = new Date().toISOString();

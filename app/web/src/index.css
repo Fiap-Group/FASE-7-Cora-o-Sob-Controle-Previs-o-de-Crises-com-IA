@@ -498,7 +498,6 @@ button.primario:not(:disabled):hover {
   margin: 8px 0 16px;
 }
 
-.linhaDupla,
 .linha-dinamica {
   display: flex;
   gap: 8px;

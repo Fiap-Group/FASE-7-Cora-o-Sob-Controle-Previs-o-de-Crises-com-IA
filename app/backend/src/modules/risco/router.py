@@ -25,7 +25,6 @@ def avaliar_risco(
     avaliador: Callable[[dict], RecomendacaoFinal] = Depends(get_avaliador_risco),
     db: Session = Depends(get_db),
 ) -> RecomendacaoFinal:
-    """Roda o fluxo multiagente completo para os dados de operação recebidos."""
     try:
         recomendacao = avaliador(paciente.como_dict())
     except Exception as e:
@@ -57,7 +56,6 @@ def _registrar_historico(db: Session, paciente: AvaliarRiscoRequest, recomendaca
 
 @router.get("/leitura-iot", response_model=LeituraIotResponse)
 def leitura_iot(leitura: LeituraIot = Depends(get_leitura_iot)) -> LeituraIotResponse:
-    """Devolve a última leitura de sinais vitais recebida do ESP32 via MQTT."""
     return LeituraIotResponse(
         conectado=leitura.conectado,
         fc_media=leitura.fc_media,

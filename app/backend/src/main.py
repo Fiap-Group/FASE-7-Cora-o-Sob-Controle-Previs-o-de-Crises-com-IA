@@ -32,7 +32,6 @@ from src.modules.risco.router import router as risco_router
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    """Cria as tabelas do banco e sobe o listener MQTT junto do boot do servidor."""
     Base.metadata.create_all(engine)
     iniciar_mqtt_listener()
     yield
@@ -44,7 +43,6 @@ configurar_telemetria(app)
 
 @app.middleware("http")
 async def medir_requisicoes_http(request: Request, chamar_proximo):
-    """Mede toda requisição HTTP (contagem + latência) com labels de rota, status e cliente de origem."""
     cliente = identificar_cliente(request)
     inicio = time.perf_counter()
     resposta = await chamar_proximo(request)

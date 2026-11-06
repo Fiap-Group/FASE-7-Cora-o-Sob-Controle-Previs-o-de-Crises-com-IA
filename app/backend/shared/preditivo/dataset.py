@@ -18,7 +18,6 @@ COLUNA_ALVO = "pico_risco"
 
 
 def gerar_base_sintetica(n: int = 5000, seed: int = 42) -> pd.DataFrame:
-    """Gera `n` pacientes sintéticos com as 10 features e o alvo `pico_risco`."""
     rng = np.random.RandomState(seed)
     df = pd.DataFrame({
         "idade_media": rng.normal(55, 12, n).clip(18, 90),

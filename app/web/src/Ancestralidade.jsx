@@ -44,10 +44,8 @@ export default function Ancestralidade() {
   const [riscosLinhas, setRiscosLinhas] = useState([{ id: 'risco-0', nome: '', nivel: 'moderado', descricao: '' }]);
 
   const contadorId = useRef(1);
-  /** Gera um id sequencial único para uma nova linha do formulário. */
   const novoId = (prefixo) => `${prefixo}-${contadorId.current++}`;
 
-  /** Preenche os campos do formulário a partir de um relatório genômico existente. */
   const preencherFormularioComPerfil = (dados) => {
     if (!dados) return;
     setPacienteNome(dados.paciente?.nome || '');
@@ -70,10 +68,8 @@ export default function Ancestralidade() {
     );
   };
 
-  /** Preenche o formulário com um relatório genômico de exemplo. */
   const handleUsarExemplo = () => preencherFormularioComPerfil(relatorioGenomicoExemplo);
 
-  /** Abre o formulário preenchido com o relatório atual, para edição/substituição. */
   const handleAbrirNovoRelatorio = () => {
     preencherFormularioComPerfil(perfil);
     setSessaoParaAbrir(null);
@@ -93,7 +89,6 @@ export default function Ancestralidade() {
     setRiscosLinhas((atual) => [...atual, { id: novoId('risco'), nome: '', nivel: 'moderado', descricao: '' }]);
   const removerRiscoLinha = (id) => setRiscosLinhas((atual) => atual.filter((l) => l.id !== id));
 
-  /** Monta o relatório genômico a partir dos dados preenchidos no formulário, descartando linhas vazias. */
   const montarRelatorio = () => {
     const ancestralidadeValida = ancestralidadeLinhas
       .map((l) => ({ origem: l.origem.trim(), percentual: Number(String(l.percentual).replace(',', '.')) }))
@@ -146,7 +141,6 @@ export default function Ancestralidade() {
     }
   };
 
-  /** Valida o formulário e, após confirmar o consentimento quando necessário, envia o relatório. */
   const handleEnviar = async (evento) => {
     evento.preventDefault();
     setErro('');
@@ -179,7 +173,6 @@ export default function Ancestralidade() {
     await enviarRelatorio(perfilMontado);
   };
 
-  /** Confirma e apaga todos os dados genômicos, no navegador e no índice do backend. */
   const handleApagarDados = async () => {
     if (
       !window.confirm(
