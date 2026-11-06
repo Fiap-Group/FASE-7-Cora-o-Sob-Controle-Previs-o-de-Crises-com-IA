@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import RiscoCard from '../components/RiscoCard';
 import AncestralidadeBarra from '../components/AncestralidadeBarra';
@@ -7,11 +7,14 @@ import Disclaimer from '../components/Disclaimer';
 import { buscarPerfilGenomicoAtual } from '../db/database';
 import { mapearRiscos, riscoDeMaiorSeveridade, topAncestralidade } from '../utils/perfilGenomico';
 import { useAuth } from '../context/AuthContext';
-import styles from '../styles/dashboardScreenStyles';
+import { useTema } from '../theme/ThemeContext';
+import criarEstilos from '../styles/dashboardScreenStyles';
 
 /** Tela inicial do app, com destaques de risco, ancestralidade e resumos recentes. */
 export default function DashboardScreen({ navigation }) {
   const { usuario, sair } = useAuth();
+  const { colors } = useTema();
+  const styles = useMemo(() => criarEstilos(colors), [colors]);
   const [riscoDestaque, setRiscoDestaque] = useState(null);
   const [ancestralidadeDestaque, setAncestralidadeDestaque] = useState([]);
 

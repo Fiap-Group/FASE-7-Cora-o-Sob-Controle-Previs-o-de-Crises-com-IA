@@ -1,9 +1,20 @@
-import { useEffect, useRef, useState } from 'react';
-import { FlatList, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { colors } from '../theme/colors';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  AccessibilityInfo,
+  Animated,
+  Easing,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useTema } from '../theme/ThemeContext';
 import { buscarMensagens, salvarMensagem } from '../db/database';
 import { perguntarAoAgente } from '../services/api';
-import styles from '../styles/chatBoxStyles';
+import criarEstilos from '../styles/chatBoxStyles';
 
 const NOMES_SECAO = {
   perfil: 'Seu perfil',
@@ -13,12 +24,47 @@ const NOMES_SECAO = {
   recomendacoes: 'Recomendações',
 };
 
+/** Anima a entrada de cada bolha nova com fade + rise, espelhando a animação `entrada-suave` do web. */
+function BolhaAnimada({ reduzMotion, children }) {
+  const progresso = useRef(new Animated.Value(reduzMotion ? 1 : 0)).current;
+
+  useEffect(() => {
+    if (reduzMotion) return;
+    Animated.timing(progresso, {
+      toValue: 1,
+      duration: 220,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [reduzMotion, progresso]);
+
+  return (
+    <Animated.View
+      style={{
+        opacity: progresso,
+        transform: [{ translateY: progresso.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }],
+      }}
+    >
+      {children}
+    </Animated.View>
+  );
+}
+
 /** Caixa de chat que exibe o histórico de mensagens e permite conversar com o agente de IA. */
 export default function ChatBox({ sessaoId }) {
+  const { colors } = useTema();
+  const styles = useMemo(() => criarEstilos(colors), [colors]);
   const [mensagens, setMensagens] = useState([]);
   const [texto, setTexto] = useState('');
   const [fontesAbertas, setFontesAbertas] = useState({});
+  const [reduzMotion, setReduzMotion] = useState(false);
   const listaRef = useRef(null);
+
+  useEffect(() => {
+    AccessibilityInfo.isReduceMotionEnabled().then(setReduzMotion);
+    const assinatura = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduzMotion);
+    return () => assinatura.remove();
+  }, []);
 
   useEffect(() => {
     if (!sessaoId) return;
@@ -74,7 +120,7 @@ export default function ChatBox({ sessaoId }) {
         contentContainerStyle={styles.lista}
         onContentSizeChange={() => listaRef.current?.scrollToEnd({ animated: true })}
         renderItem={({ item }) => (
-          <View>
+          <BolhaAnimada reduzMotion={reduzMotion}>
             <View style={[styles.bolha, item.autor === 'usuario' ? styles.bolhaUsuario : styles.bolhaIA]}>
               <Text style={item.autor === 'usuario' ? styles.textoUsuario : styles.textoIA}>{item.texto}</Text>
             </View>
@@ -98,7 +144,7 @@ export default function ChatBox({ sessaoId }) {
                   ))}
               </View>
             )}
-          </View>
+          </BolhaAnimada>
         )}
       />
 

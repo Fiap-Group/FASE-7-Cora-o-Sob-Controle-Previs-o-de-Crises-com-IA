@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CardioIA</title>
+    <script>
+      (function () {
+        var salvo = localStorage.getItem('cardioia_tema');
+        var tema = salvo === 'dark' || salvo === 'light'
+          ? salvo
+          : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', tema);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

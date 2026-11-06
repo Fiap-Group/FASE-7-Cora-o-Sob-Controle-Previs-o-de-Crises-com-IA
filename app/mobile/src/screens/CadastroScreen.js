@@ -1,13 +1,16 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { cadastrar } from '../services/api';
 import { avisar } from '../utils/alerta';
-import styles from '../styles/loginScreenStyles';
+import { useTema } from '../theme/ThemeContext';
+import criarEstilos from '../styles/loginScreenStyles';
 
 const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Tela de cadastro de novo usuário por e-mail e senha. */
 export default function CadastroScreen({ navigation }) {
+  const { colors } = useTema();
+  const styles = useMemo(() => criarEstilos(colors), [colors]);
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [cadastrando, setCadastrando] = useState(false);

@@ -1,13 +1,7 @@
+import { useMemo } from 'react';
 import { View, Text } from 'react-native';
-import { colors } from '../theme/colors';
-import styles from '../styles/riscoCardStyles';
-
-const NIVEL_STATUS = {
-  baixo: colors.status.good,
-  moderado: colors.status.warning,
-  alto: colors.status.serious,
-  'muito alto': colors.status.critical,
-};
+import { useTema } from '../theme/ThemeContext';
+import criarEstilos from '../styles/riscoCardStyles';
 
 const NIVEL_LABEL = {
   baixo: 'Risco Baixo',
@@ -18,6 +12,15 @@ const NIVEL_LABEL = {
 
 /** Exibe um cartão com a condição, nível de risco e descrição associada. */
 export default function RiscoCard({ condicao, nivel, descricao }) {
+  const { colors } = useTema();
+  const styles = useMemo(() => criarEstilos(colors), [colors]);
+
+  const NIVEL_STATUS = {
+    baixo: colors.status.good,
+    moderado: colors.status.warning,
+    alto: colors.status.serious,
+    'muito alto': colors.status.critical,
+  };
   const status = NIVEL_STATUS[nivel] ?? colors.status.good;
 
   return (

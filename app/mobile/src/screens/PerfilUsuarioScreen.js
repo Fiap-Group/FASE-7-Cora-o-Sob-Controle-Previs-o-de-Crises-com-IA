@@ -1,22 +1,17 @@
-import { useCallback, useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { View, Text, ScrollView, ActivityIndicator, Switch } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import Avatar from '../components/Avatar';
 import RiscoCard from '../components/RiscoCard';
 import { useAuth } from '../context/AuthContext';
 import { buscarPerfil } from '../services/api';
 import { RISCO_CARDIACO_FEATURES } from '../data/riscoCardiacoFeatures';
-import { colors } from '../theme/colors';
-import styles from '../styles/perfilUsuarioScreenStyles';
+import { useTema } from '../theme/ThemeContext';
+import criarEstilos from '../styles/perfilUsuarioScreenStyles';
 
 const NIVEL_POR_CLASSIFICACAO = {
   'Alto risco': 'alto',
   'Baixo risco': 'baixo',
-};
-
-const STATUS_POR_CLASSIFICACAO = {
-  'Alto risco': colors.status.critical,
-  'Baixo risco': colors.status.good,
 };
 
 /** Formata uma data ISO para o padrão "dd/mm/aa hh:mm" em português. */
@@ -32,6 +27,12 @@ function formatarDataHora(iso) {
 /** Tela de perfil do usuário com avatar, risco mais recente, dados da avaliação e histórico. */
 export default function PerfilUsuarioScreen() {
   const { usuario } = useAuth();
+  const { colors, esquema, alternarTema } = useTema();
+  const styles = useMemo(() => criarEstilos(colors), [colors]);
+  const STATUS_POR_CLASSIFICACAO = {
+    'Alto risco': colors.status.critical,
+    'Baixo risco': colors.status.good,
+  };
   const [perfil, setPerfil] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
@@ -81,6 +82,17 @@ export default function PerfilUsuarioScreen() {
           <Avatar usuarioId={usuario?.id} nickname={usuario?.nickname} tamanho={88} />
           <Text style={styles.nickname}>{usuario?.nickname}</Text>
           <Text style={styles.email}>{usuario?.email}</Text>
+        </View>
+
+        <Text style={styles.secaoTitulo}>Preferências</Text>
+        <View style={styles.preferenciaLinha}>
+          <Text style={styles.preferenciaLabel}>Modo escuro</Text>
+          <Switch
+            value={esquema === 'dark'}
+            onValueChange={alternarTema}
+            trackColor={{ false: colors.border, true: colors.primary }}
+            thumbColor={colors.white}
+          />
         </View>
 
         <Text style={styles.secaoTitulo}>Risco mais recente</Text>

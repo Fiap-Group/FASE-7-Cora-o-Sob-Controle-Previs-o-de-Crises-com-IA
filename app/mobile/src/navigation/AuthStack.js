@@ -2,13 +2,15 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../screens/LoginScreen';
 import CadastroScreen from '../screens/CadastroScreen';
 import EscolherNicknameScreen from '../screens/EscolherNicknameScreen';
-import { colors } from '../theme/colors';
+import { useTema } from '../theme/ThemeContext';
 import { fonts } from '../theme/typography';
 
 const Stack = createNativeStackNavigator();
 
 /** Define a navegação em pilha das telas de login, cadastro e escolha de nickname. */
 export default function AuthStack() {
+  const { colors } = useTema();
+
   return (
     <Stack.Navigator
       initialRouteName="Login"

@@ -226,7 +226,7 @@ export default function Ancestralidade() {
         </div>
       )}
 
-      {erro && <p className="erro">{erro}</p>}
+      {erro && <p className="erro" role="alert">{erro}</p>}
 
       {visao === 'chat' && <Chat sessaoInicialId={sessaoParaAbrir} />}
 

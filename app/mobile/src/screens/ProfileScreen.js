@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, TextInput, TouchableOpacity } from 'react-native';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import AncestralidadeBarra from '../components/AncestralidadeBarra';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -16,7 +16,8 @@ import { gerarNovoResumo } from '../services/resumoService';
 import { mapearAncestralidade, mapearNivelRisco } from '../utils/perfilGenomico';
 import { avisar, confirmarAcao } from '../utils/alerta';
 import relatorioGenomicoExemplo from '../data/relatorioGenomico';
-import styles from '../styles/ancestralidadeScreenStyles';
+import { useTema } from '../theme/ThemeContext';
+import criarEstilos from '../styles/ancestralidadeScreenStyles';
 
 const OPCOES_SEXO = [
   { label: 'Prefiro não informar', value: 'nao_informado' },
@@ -33,6 +34,8 @@ const OPCOES_NIVEL_RISCO = [
 
 /** Tela de ancestralidade: exibe o relatório genômico e permite cadastrar ou substituir um relatório. */
 export default function ProfileScreen({ navigation }) {
+  const { colors } = useTema();
+  const styles = useMemo(() => criarEstilos(colors), [colors]);
   const [carregando, setCarregando] = useState(true);
   const [perfil, setPerfil] = useState(null);
   const [ancestralidade, setAncestralidade] = useState([]);

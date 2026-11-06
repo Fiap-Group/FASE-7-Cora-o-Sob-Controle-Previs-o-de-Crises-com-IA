@@ -1,9 +1,13 @@
+import { useMemo } from 'react';
 import { View, Text } from 'react-native';
 import ChatBox from '../components/ChatBox';
-import styles from '../styles/chatScreenStyles';
+import { useTema } from '../theme/ThemeContext';
+import criarEstilos from '../styles/chatScreenStyles';
 
 /** Tela de conversa com o agente, exibindo o contexto do resumo quando houver. */
 export default function ChatScreen({ route }) {
+  const { colors } = useTema();
+  const styles = useMemo(() => criarEstilos(colors), [colors]);
   const { sessaoId, resumoData } = route.params;
 
   return (

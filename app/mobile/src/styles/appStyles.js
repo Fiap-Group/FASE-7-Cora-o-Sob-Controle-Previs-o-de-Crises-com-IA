@@ -1,17 +1,18 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '../theme/colors';
 import { fonts } from '../theme/typography';
 
-export default StyleSheet.create({
+export default function criarEstilos(colors) {
+  return StyleSheet.create({
   tabBar: {
-    height: 60,
-    paddingBottom: 6,
-    paddingTop: 6,
+    height: 68,
+    paddingBottom: 10,
+    paddingTop: 8,
     backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
-  tabBarLabel: { fontSize: 11, fontFamily: fonts.semiBold },
+  tabBarLabel: { fontSize: 11, fontFamily: fonts.semiBold, marginTop: 2 },
   header: { backgroundColor: colors.primary },
   headerTitle: { fontFamily: fonts.bold, fontSize: 18 },
-});
+  });
+}

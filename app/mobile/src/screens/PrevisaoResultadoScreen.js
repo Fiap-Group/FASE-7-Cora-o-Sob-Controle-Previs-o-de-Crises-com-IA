@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import RiscoCard from '../components/RiscoCard';
 import Disclaimer from '../components/Disclaimer';
-import styles from '../styles/previsaoResultadoScreenStyles';
+import { useTema } from '../theme/ThemeContext';
+import criarEstilos from '../styles/previsaoResultadoScreenStyles';
 
 const NIVEL_POR_CLASSIFICACAO = {
   'Alto risco': 'alto',
@@ -10,6 +12,8 @@ const NIVEL_POR_CLASSIFICACAO = {
 
 /** Tela que exibe o resultado da previsão de risco cardíaco e protocolos sugeridos. */
 export default function PrevisaoResultadoScreen({ route }) {
+  const { colors } = useTema();
+  const styles = useMemo(() => criarEstilos(colors), [colors]);
   const { resultado } = route.params;
   const { probabilidade, classificacao, protocolos, recomendacao } = resultado;
 
