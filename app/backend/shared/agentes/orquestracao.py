@@ -29,7 +29,7 @@ class SpanPorAgenteHooks(RunHooks):
         logger.info("Agente concluído: %s", agent.name, extra={"evento": "agente_fim"})
 
 
-def avaliar_paciente(dados: dict) -> RecomendacaoFinal:
+def avaliar_paciente(dados: dict[str, float]) -> RecomendacaoFinal:
     orquestrador = construir_agentes()
     mensagem = json.dumps(dados, ensure_ascii=False)
 

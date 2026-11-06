@@ -22,7 +22,7 @@ router = APIRouter(prefix="/api/risco", tags=["risco"])
 @router.post("/avaliar", response_model=RecomendacaoFinal)
 def avaliar_risco(
     paciente: AvaliarRiscoRequest,
-    avaliador: Callable[[dict], RecomendacaoFinal] = Depends(get_avaliador_risco),
+    avaliador: Callable[[dict[str, float]], RecomendacaoFinal] = Depends(get_avaliador_risco),
     db: Session = Depends(get_db),
 ) -> RecomendacaoFinal:
     try:
