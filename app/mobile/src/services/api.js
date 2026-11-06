@@ -8,7 +8,7 @@ const API_URL =
     default: 'http://localhost:5000',
   });
 
-const HEADERS_PADRAO = { 'X-Client-Platform': 'mobile' };
+const HEADERS_PADRAO = { 'X-Client-Platform': 'mobile', 'ngrok-skip-browser-warning': 'true' };
 
 let indexadoNestaSessao = false;
 
