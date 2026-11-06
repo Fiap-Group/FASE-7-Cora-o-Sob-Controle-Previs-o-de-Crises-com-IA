@@ -2,14 +2,16 @@ import * as SQLite from 'expo-sqlite';
 
 const DATABASE_NAME = 'cardioia.db';
 
-let dbInstance = null;
+let dbPromise = null;
 
-/** Abre (ou reaproveita) a conexão com o banco SQLite local. */
-async function getDatabase() {
-  if (!dbInstance) {
-    dbInstance = await SQLite.openDatabaseAsync(DATABASE_NAME);
+/** Abre (ou reaproveita) a conexão com o banco SQLite local. Guarda a promise (não só o resultado) pra
+ * chamadas concorrentes (ex.: App.js e o ThemeProvider abrindo o banco ao mesmo tempo) aguardarem a
+ * mesma abertura em vez de chamar `openDatabaseAsync` duas vezes, o que falha no backend web (OPFS). */
+function getDatabase() {
+  if (!dbPromise) {
+    dbPromise = SQLite.openDatabaseAsync(DATABASE_NAME);
   }
-  return dbInstance;
+  return dbPromise;
 }
 
 /** Cria as tabelas do banco local, caso ainda não existam. */
@@ -67,7 +69,29 @@ export async function initDatabase() {
       email TEXT,
       nickname TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS configuracoes (
+      chave TEXT PRIMARY KEY,
+      valor TEXT NOT NULL
+    );
   `);
+}
+
+/** Busca o valor salvo de uma configuração (ex.: tema), ou null se nunca foi definida. */
+export async function obterConfiguracao(chave) {
+  const db = await getDatabase();
+  const linha = await db.getFirstAsync('SELECT valor FROM configuracoes WHERE chave = ?', [chave]);
+  return linha ? linha.valor : null;
+}
+
+/** Salva (ou atualiza) o valor de uma configuração. */
+export async function salvarConfiguracao(chave, valor) {
+  const db = await getDatabase();
+  await db.runAsync(
+    `INSERT INTO configuracoes (chave, valor) VALUES (?, ?)
+     ON CONFLICT (chave) DO UPDATE SET valor = excluded.valor`,
+    [chave, valor]
+  );
 }
 
 /** Salva localmente qual usuário está logado neste aparelho. */

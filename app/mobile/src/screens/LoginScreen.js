@@ -1,14 +1,17 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { login } from '../services/api';
 import { definirSessao } from '../db/database';
 import { useAuth } from '../context/AuthContext';
 import { avisar } from '../utils/alerta';
-import styles from '../styles/loginScreenStyles';
+import { useTema } from '../theme/ThemeContext';
+import criarEstilos from '../styles/loginScreenStyles';
 
 /** Tela de login de usuário por e-mail e senha. */
 export default function LoginScreen({ navigation }) {
   const { recarregarSessao } = useAuth();
+  const { colors } = useTema();
+  const styles = useMemo(() => criarEstilos(colors), [colors]);
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [entrando, setEntrando] = useState(false);

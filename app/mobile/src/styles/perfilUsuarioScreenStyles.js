@@ -1,8 +1,8 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '../theme/colors';
 import { fonts } from '../theme/typography';
 
-export default StyleSheet.create({
+export default function criarEstilos(colors) {
+  return StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20 },
   centro: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
@@ -29,6 +29,20 @@ export default StyleSheet.create({
     fontSize: 13,
     fontFamily: fonts.regular,
     color: colors.textSecondary,
+  },
+  preferenciaLinha: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  preferenciaLabel: {
+    fontSize: 14,
+    fontFamily: fonts.semiBold,
+    color: colors.textPrimary,
   },
   grid: {
     flexDirection: 'row',
@@ -79,4 +93,5 @@ export default StyleSheet.create({
     fontSize: 11,
     fontFamily: fonts.semiBold,
   },
-});
+  });
+}

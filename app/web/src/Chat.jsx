@@ -171,7 +171,7 @@ export default function Chat({ sessaoInicialId }) {
         </button>
       </div>
 
-      {erro && <p className="erro">{erro}</p>}
+      {erro && <p className="erro" role="alert">{erro}</p>}
 
       {resumos.length === 0 ? (
         <p className="introducao">Nenhum resumo ainda. Clique em "+ Novo Resumo" para gerar o primeiro.</p>

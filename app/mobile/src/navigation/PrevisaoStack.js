@@ -1,13 +1,15 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import PrevisaoFormScreen from '../screens/PrevisaoFormScreen';
 import PrevisaoResultadoScreen from '../screens/PrevisaoResultadoScreen';
-import { colors } from '../theme/colors';
+import { useTema } from '../theme/ThemeContext';
 import { fonts } from '../theme/typography';
 
 const Stack = createNativeStackNavigator();
 
 /** Define a navegação em pilha entre o formulário de previsão de risco e seu resultado. */
 export default function PrevisaoStack() {
+  const { colors } = useTema();
+
   return (
     <Stack.Navigator
       screenOptions={{

@@ -47,8 +47,8 @@ parar_pid "ngrok"  "$LOGS/ngrok.pid"
 parar_pid "mobile" "$LOGS/mobile.pid"
 parar_pid "web"    "$LOGS/web.pid"
 
-# Fallback por padrão de comando — cobre processos filhos que sobraram
-# (ex.: sessões antigas, subidas antes do script usar 'set -m').
+# Fallback por padrão de comando — cobre resquícios de sessões antigas,
+# subidas antes do script usar 'setsid' pra cada processo em background.
 pkill -f "ngrok http 5000" 2>/dev/null && echo "  ✓ resquício de ngrok encerrado"
 pkill -f "$RAIZ/app/mobile/node_modules/.bin/expo" 2>/dev/null && echo "  ✓ resquício do metro/expo encerrado"
 pkill -f "$RAIZ/app/web/node_modules/.bin/vite" 2>/dev/null && echo "  ✓ resquício do vite encerrado"

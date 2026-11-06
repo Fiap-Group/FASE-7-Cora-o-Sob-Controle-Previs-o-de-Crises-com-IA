@@ -1,15 +1,18 @@
 import { View, Text, ScrollView } from 'react-native';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import RiscoCard from '../components/RiscoCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Disclaimer from '../components/Disclaimer';
 import { buscarPerfilGenomicoAtual } from '../db/database';
 import { mapearRiscos } from '../utils/perfilGenomico';
-import styles from '../styles/riscosScreenStyles';
+import { useTema } from '../theme/ThemeContext';
+import criarEstilos from '../styles/riscosScreenStyles';
 
 /** Tela inicial que exibe os cards de risco derivados do relatório genômico do usuário. */
 export default function HomeScreen() {
+   const { colors } = useTema();
+   const styles = useMemo(() => criarEstilos(colors), [colors]);
    const [carregando, setCarregando] = useState(true);
    const [riscos, setRiscos] = useState([]);
 

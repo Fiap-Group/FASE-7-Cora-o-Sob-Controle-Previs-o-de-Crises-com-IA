@@ -1,13 +1,15 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ResumosScreen from '../screens/ResumosScreen';
 import ChatScreen from '../screens/ChatScreen';
-import { colors } from '../theme/colors';
+import { useTema } from '../theme/ThemeContext';
 import { fonts } from '../theme/typography';
 
 const Stack = createNativeStackNavigator();
 
 /** Define a navegação em pilha das telas de resumos e conversa com o agente. */
 export default function AnaliseStack() {
+  const { colors } = useTema();
+
   return (
     <Stack.Navigator
       screenOptions={{

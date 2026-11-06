@@ -56,7 +56,7 @@ export default function Perfil({ usuario }) {
   }, [usuario.id]);
 
   if (carregando && !perfil) return <p className="introducao">Carregando perfil...</p>;
-  if (erro) return <p className="erro">{erro}</p>;
+  if (erro) return <p className="erro" role="alert">{erro}</p>;
 
   const avaliacao = perfil?.avaliacao_mais_recente;
 

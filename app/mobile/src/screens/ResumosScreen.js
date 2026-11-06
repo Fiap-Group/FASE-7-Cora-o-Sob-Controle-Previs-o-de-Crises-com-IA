@@ -1,15 +1,17 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import ResumoCard from '../components/ResumoCard';
 import { buscarResumos, deletarResumo } from '../db/database';
 import { gerarNovoResumo } from '../services/resumoService';
 import { avisar, confirmarAcao } from '../utils/alerta';
-import { colors } from '../theme/colors';
-import styles from '../styles/resumosScreenStyles';
+import { useTema } from '../theme/ThemeContext';
+import criarEstilos from '../styles/resumosScreenStyles';
 
 /** Tela de listagem dos resumos gerados, com opção de gerar um novo. */
 export default function ResumosScreen({ navigation }) {
+  const { colors } = useTema();
+  const styles = useMemo(() => criarEstilos(colors), [colors]);
   const [resumos, setResumos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [gerando, setGerando] = useState(false);

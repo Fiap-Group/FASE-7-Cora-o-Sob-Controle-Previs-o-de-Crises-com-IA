@@ -1,8 +1,8 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '../theme/colors';
 import { fonts } from '../theme/typography';
 
-export default StyleSheet.create({
+export default function criarEstilos(colors) {
+  return StyleSheet.create({
   circulo: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -11,4 +11,5 @@ export default StyleSheet.create({
     color: colors.white,
     fontFamily: fonts.extraBold,
   },
-});
+  });
+}

@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import styles from '../styles/resumoCardStyles';
+import { useTema } from '../theme/ThemeContext';
+import criarEstilos from '../styles/resumoCardStyles';
 
 /** Formata uma data ISO para o padrão "dd/mm/aaaa às hh:mm" em português. */
 function formatarDataHora(dataIso) {
@@ -11,6 +13,9 @@ function formatarDataHora(dataIso) {
 
 /** Exibe um cartão de resumo com data de criação, permitindo abrir ou remover. */
 export default function ResumoCard({ dataCriacao, onPress, onRemover }) {
+  const { colors } = useTema();
+  const styles = useMemo(() => criarEstilos(colors), [colors]);
+
   return (
     <View style={styles.card}>
       <TouchableOpacity style={styles.conteudoClicavel} onPress={onPress}>

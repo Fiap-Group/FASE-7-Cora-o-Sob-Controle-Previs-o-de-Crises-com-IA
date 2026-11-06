@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
-import styles from '../styles/dropdownStyles';
+import { useTema } from '../theme/ThemeContext';
+import criarEstilos from '../styles/dropdownStyles';
 
 /** Campo de seleção com opções exibidas em um modal estilo dropdown. */
 export default function Dropdown({ options, selectedValue, onValueChange }) {
+  const { colors } = useTema();
+  const styles = useMemo(() => criarEstilos(colors), [colors]);
   const [aberto, setAberto] = useState(false);
 
   const opcaoSelecionada = options.find((opcao) => opcao.value === selectedValue);

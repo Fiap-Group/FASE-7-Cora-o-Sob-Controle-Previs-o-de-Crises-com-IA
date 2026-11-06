@@ -105,7 +105,7 @@ export default function Auth({ onAutenticado }) {
             </button>
           </div>
         </form>
-        {erro && <p className="erro">{erro}</p>}
+        {erro && <p className="erro" role="alert">{erro}</p>}
       </main>
     );
   }
@@ -150,7 +150,7 @@ export default function Auth({ onAutenticado }) {
         </div>
       </form>
 
-      {erro && <p className="erro">{erro}</p>}
+      {erro && <p className="erro" role="alert">{erro}</p>}
 
       <button type="button" className="linkAlternar" onClick={() => setModo(ehLogin ? 'cadastro' : 'login')}>
         {ehLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entrar'}

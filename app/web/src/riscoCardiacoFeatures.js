@@ -1,12 +1,17 @@
 export const RISCO_CARDIACO_FEATURES = [
-  { chave: 'idade_media', label: 'Idade média dos pacientes', unidade: 'anos', exemplo: 60 },
-  { chave: 'carga_sistema', label: 'Carga do sistema', unidade: '%', exemplo: 90 },
-  { chave: 'tempo_espera', label: 'Tempo médio de espera', unidade: 'min', exemplo: 100 },
-  { chave: 'fc_media', label: 'Frequência cardíaca média', unidade: 'bpm', exemplo: 125 },
-  { chave: 'spo2_media', label: 'SPO2 médio', unidade: '%', exemplo: 85 },
-  { chave: 'pa_sistolica', label: 'Pressão arterial sistólica média', unidade: 'mmHg', exemplo: 85 },
-  { chave: 'temperatura', label: 'Temperatura média', unidade: '°C', exemplo: 39 },
-  { chave: 'densidade_eventos', label: 'Densidade de eventos', unidade: 'eventos/período', exemplo: 7 },
-  { chave: 'eventos_24h', label: 'Eventos nas últimas 24h', unidade: 'eventos', exemplo: 6 },
-  { chave: 'disponibilidade_recursos', label: 'Disponibilidade de recursos', unidade: '%', exemplo: 20 },
+  { chave: 'idade_media', label: 'Idade média dos pacientes', unidade: 'anos', exemplo: 60, grupo: 'operacao' },
+  { chave: 'carga_sistema', label: 'Carga do sistema', unidade: '%', exemplo: 90, grupo: 'operacao' },
+  { chave: 'tempo_espera', label: 'Tempo médio de espera', unidade: 'min', exemplo: 100, grupo: 'operacao' },
+  { chave: 'fc_media', label: 'Frequência cardíaca média', unidade: 'bpm', exemplo: 125, grupo: 'vitais' },
+  { chave: 'spo2_media', label: 'SPO2 médio', unidade: '%', exemplo: 85, grupo: 'vitais' },
+  { chave: 'pa_sistolica', label: 'Pressão arterial sistólica média', unidade: 'mmHg', exemplo: 85, grupo: 'vitais' },
+  { chave: 'temperatura', label: 'Temperatura média', unidade: '°C', exemplo: 39, grupo: 'vitais' },
+  { chave: 'densidade_eventos', label: 'Densidade de eventos', unidade: 'eventos/período', exemplo: 7, grupo: 'operacao' },
+  { chave: 'eventos_24h', label: 'Eventos nas últimas 24h', unidade: 'eventos', exemplo: 6, grupo: 'operacao' },
+  { chave: 'disponibilidade_recursos', label: 'Disponibilidade de recursos', unidade: '%', exemplo: 20, grupo: 'operacao' },
+];
+
+export const GRUPOS_RISCO_CARDIACO = [
+  { chave: 'operacao', titulo: 'Operação hospitalar' },
+  { chave: 'vitais', titulo: 'Sinais vitais' },
 ];

@@ -1,8 +1,8 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '../theme/colors';
 import { fonts } from '../theme/typography';
 
-export default StyleSheet.create({
+export default function criarEstilos(colors) {
+  return StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
     borderRadius: 12,
@@ -42,4 +42,5 @@ export default StyleSheet.create({
     color: colors.textSecondary,
     lineHeight: 19,
   },
-});
+  });
+}

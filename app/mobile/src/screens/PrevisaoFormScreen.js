@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { RISCO_CARDIACO_FEATURES } from '../data/riscoCardiacoFeatures';
+import { GRUPOS_RISCO_CARDIACO, RISCO_CARDIACO_FEATURES } from '../data/riscoCardiacoFeatures';
 import { avaliarRisco } from '../services/riscoService';
 import { buscarLeituraIot } from '../services/api';
 import { avisar } from '../utils/alerta';
-import { colors } from '../theme/colors';
 import { useAuth } from '../context/AuthContext';
-import styles from '../styles/ancestralidadeScreenStyles';
+import { useTema } from '../theme/ThemeContext';
+import criarEstilos from '../styles/ancestralidadeScreenStyles';
 
 const VALORES_INICIAIS = Object.fromEntries(RISCO_CARDIACO_FEATURES.map((f) => [f.chave, '']));
 const VALORES_EXEMPLO = Object.fromEntries(RISCO_CARDIACO_FEATURES.map((f) => [f.chave, String(f.exemplo)]));
@@ -14,6 +14,8 @@ const VALORES_EXEMPLO = Object.fromEntries(RISCO_CARDIACO_FEATURES.map((f) => [f
 /** Tela de formulário para informar métricas e solicitar a avaliação de risco cardíaco. */
 export default function PrevisaoFormScreen({ navigation }) {
   const { usuario } = useAuth();
+  const { colors } = useTema();
+  const styles = useMemo(() => criarEstilos(colors), [colors]);
   const [valores, setValores] = useState(VALORES_INICIAIS);
   const [enviando, setEnviando] = useState(false);
   const [buscandoIot, setBuscandoIot] = useState(false);
@@ -44,12 +46,12 @@ export default function PrevisaoFormScreen({ navigation }) {
         return;
       }
 
-      setValores({
-        ...VALORES_EXEMPLO,
+      setValores((atual) => ({
+        ...atual,
         fc_media: String(leitura.fc_media),
         pa_sistolica: String(leitura.pa_sistolica),
         spo2_media: String(leitura.spo2_media),
-      });
+      }));
     } catch (erro) {
       avisar('Não foi possível buscar a leitura do sensor', erro.message);
     } finally {
@@ -100,19 +102,24 @@ export default function PrevisaoFormScreen({ navigation }) {
         </Text>
 
         <View style={styles.formulario}>
-          {RISCO_CARDIACO_FEATURES.map(({ chave, label, unidade }) => (
-            <View key={chave} style={styles.campo}>
-              <Text style={styles.label}>
-                {label} ({unidade})
-              </Text>
-              <TextInput
-                style={styles.inputTexto}
-                value={valores[chave]}
-                onChangeText={(texto) => atualizarCampo(chave, texto)}
-                placeholder="0"
-                keyboardType="numeric"
-                editable={!enviando}
-              />
+          {GRUPOS_RISCO_CARDIACO.map(({ chave: grupoChave, titulo }) => (
+            <View key={grupoChave}>
+              <Text style={styles.subtituloFormulario}>{titulo}</Text>
+              {RISCO_CARDIACO_FEATURES.filter((f) => f.grupo === grupoChave).map(({ chave, label, unidade }) => (
+                <View key={chave} style={styles.campo}>
+                  <Text style={styles.label}>
+                    {label} ({unidade})
+                  </Text>
+                  <TextInput
+                    style={styles.inputTexto}
+                    value={valores[chave]}
+                    onChangeText={(texto) => atualizarCampo(chave, texto)}
+                    placeholder="0"
+                    keyboardType="numeric"
+                    editable={!enviando}
+                  />
+                </View>
+              ))}
             </View>
           ))}
 

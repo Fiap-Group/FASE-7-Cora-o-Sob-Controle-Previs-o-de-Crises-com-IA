@@ -1,8 +1,8 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '../theme/colors';
 import { fonts } from '../theme/typography';
 
-export default StyleSheet.create({
+export default function criarEstilos(colors) {
+  return StyleSheet.create({
   trigger: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -56,4 +56,5 @@ export default StyleSheet.create({
     fontFamily: fonts.bold,
     color: colors.primary,
   },
-});
+  });
+}
