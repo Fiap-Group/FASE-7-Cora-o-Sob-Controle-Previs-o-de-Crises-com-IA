@@ -1,7 +1,7 @@
 import { buscarPerfilGenomicoAtual } from './genomicoDb';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-const HEADERS_PADRAO = { 'X-Client-Platform': 'web' };
+const HEADERS_PADRAO = { 'X-Client-Platform': 'web', 'ngrok-skip-browser-warning': 'true' };
 
 /**
  * Monta a mensagem de erro a partir do corpo da resposta, com um texto padrão de reserva.
